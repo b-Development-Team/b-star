@@ -159,12 +159,13 @@ async def leaderboards(page: int):
 
     results = table.fetchall()
     firststep = []
-    for index, tag in enumerate(results):
-        firststep.append(
-            f"{index + 1} : {tag[0]} :: {tag[1]} uses (written by {(await IDtoUser(tag[2])).name} at {unixToReadable(tag[3])})")
+    firststep.extend(
+        f"{index + 1} : {tag[0]} :: {tag[1]} uses (written by {(await IDtoUser(tag[2])).name} at {unixToReadable(tag[3])})"
+        for index, tag in enumerate(results)
+    )
+
     secondstep = "\n".join(firststep)
-    board = f"```{secondstep}```"
-    return board
+    return f"```{secondstep}```"
 
 
 async def infoTag(message, name: str):

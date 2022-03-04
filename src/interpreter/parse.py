@@ -12,12 +12,9 @@ def parseCode(program: str):
         if newString and c not in ["[", " ", "\n"]:
             activityStack[-1].append("")
             newString = False
-            
+
         if backslashed:
-            if c == "n":
-                activityStack[-1][-1] += "\n"
-            else:
-                activityStack[-1][-1] += c
+            activityStack[-1][-1] += "\n" if c == "n" else c
             backslashed = False
 
         elif len(activityStack) == 1:

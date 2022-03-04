@@ -58,24 +58,17 @@ def Expression(block: Union[List[str], str], codebase):
 
 
 def findFunction(name: str, codebase):  # -> Union[Callable[[List, Codebase], None], List[str]]:
-    # This tries to find a built-in function first, then tries the user-made ones.
-    functionWanted = src.interpreter.tempFunctionsFile.functions.get(name)
-
-    return functionWanted
+    return src.interpreter.tempFunctionsFile.functions.get(name)
 
 
 def isType(block):
     if type(block) == list:
-        if block[0] == "ARRAY":
-            return Type.ARRAY
-        else:
-            return Type.FUNCTION
+        return Type.ARRAY if block[0] == "ARRAY" else Type.FUNCTION
+    if fullmatch(r"^[+-]?\d+$", block):
+        return Type.INTEGER
+    elif fullmatch(r"^[+-]?\d+(.|([eE][+-]?)|)\d+$", block):
+        return Type.FLOAT
+    # elif fullmatch(r"^[+-]?\d+[eE][+-]?\d+$", block):
+    #     return Type.EXPONENT
     else:
-        if fullmatch(r"^[+-]?\d+$", block):
-            return Type.INTEGER
-        elif fullmatch(r"^[+-]?\d+(.|([eE][+-]?)|)\d+$", block):
-            return Type.FLOAT
-        # elif fullmatch(r"^[+-]?\d+[eE][+-]?\d+$", block):
-        #     return Type.EXPONENT
-        else:
-            return Type.STRING
+        return Type.STRING

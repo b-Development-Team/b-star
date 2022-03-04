@@ -13,10 +13,7 @@ def map_func(block: List, codebase):
         0: args[1] or None,
         1: args[2] or None
     }, func, False, codebase)
-    buffer = []
-    for i, item in enumerate(arr):
-        buffer.append(user.run([item, i]))
-
+    buffer = [user.run([item, i]) for i, item in enumerate(arr)]
     # Unpack buffer
     return Expression(["ARRAY", *buffer], codebase)
     # return ["ARRAY", *buffer]

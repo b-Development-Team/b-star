@@ -14,18 +14,11 @@ class UserFunction:
     def run(self, args: List[str]):
         print(f"{args} > {self.args} > {self.block} > {self.block[0]} > {self.block[0][0]}")
 
-        # TODO: There is definitely a faster way to do this (3 nested for loops is terrible)
-        # TODO: Use numpy for arrays and stuff
-        # for example maybe creating a lambda that already knows where to replace the variables
-        # instead iterating through the entire code block
-        # (interpreting within interpreting)
-        # main_buffer = []
-        main_buffer = self.enumerateList(*self.block, args)
         # if len(block_buffer) > 1:
         #     main_buffer.append(block_buffer)
         # else:
         #     main_buffer.append(block_buffer[0])
-        return main_buffer
+        return self.enumerateList(*self.block, args)
 
     def enumerateList(self, block: List[str], args: List[str]):
         block_buffer = []
