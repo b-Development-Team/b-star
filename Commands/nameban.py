@@ -3,12 +3,12 @@ from Config._const import BRAIN
 
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 1,
-		"MAIN": "Temporary command",
-		"FORMAT": "[name_string] [ignore_case]",
-		"CHANNEL": 1,
-		"USAGE": f"""(Testing command)""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Staff"
+	    "COOLDOWN": 1,
+	    "MAIN": "Temporary command",
+	    "FORMAT": "[name_string] [ignore_case]",
+	    "CHANNEL": 1,
+	    "USAGE": """(Testing command)""".replace("\n", "").replace("\t", ""),
+	    "CATEGORY": "Staff",
 	}
 
 PERMS = 3 # Developer
@@ -44,9 +44,8 @@ async def MAIN(message, args, level, perms, SERVER):
 	await msg.add_reaction("🇳")
 
 	def check(r, u):
-		return (u == message.author
-		and str(r.emoji) in ["🇾","🇳"]
-		and r.message.id == msg.id)
+		return (u == message.author and str(r.emoji) in {"🇾", "🇳"}
+		        and r.message.id == msg.id)
 
 	try:
 		r, _ = await BRAIN.wait_for('reaction_add', timeout=30, check=check)

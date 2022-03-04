@@ -101,7 +101,7 @@ async def MAIN(message, args, level, perms, SERVER):
 				return
 		output = f"```md\n---🎖️ Typing Test Leaderboard - Page {page} 🎖️---\n\n"
 		output += f" Rank |  {'Name': <24}|  WPM"
-		for i in range(page*10-10, page*10, 1):
+		for i in range(page*10-10, page*10):
 			if i >= len(scores):
 				break
 			name = None
@@ -110,13 +110,13 @@ async def MAIN(message, args, level, perms, SERVER):
 				if mem != None:
 					name = mem.name
 					break
-			if name == None:
+			if name is None:
 				name = str(scores[i][0]) # if no user is found, just use the id
 			if len(name) > 24:
-				name = name[:23] + "…" # crop long names
+				name = f'{name[:23]}…'
 			wf = str(round(float(scores[i][1]), 2))
 			if wf.find(".") != len(wf) - 3:
-				wf = wf + "0" # fixes "94.3" not being formatted as "94.30"
+				wf += "0"
 			output += f"\n{'#' if i == 0 else '-'} {(i+1): <4}|  {name.replace('_', 'ˍ').replace('*', '∗'): <24}| {wf: >6}"
 		output += "\n```"
 		await message.channel.send(output)

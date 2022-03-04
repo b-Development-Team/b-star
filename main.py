@@ -107,14 +107,14 @@ async def delete(ctx, name):
 @bot.command()
 async def ping(ctx):
     """Pings the bot"""
-    await ctx.send("pong! " + str(round(bot.latency * 1000, 2)) + "ms")
+    await ctx.send(f"pong! {str(round(bot.latency * 1000, 2))}ms")
 
 
 @bot.command()
 async def uptime(ctx):
     """Responds with uptime."""
     uptime = str(datetime.timedelta(seconds=int(round(time.time() - startTime))))
-    await ctx.send("Uptime: " + uptime)
+    await ctx.send(f"Uptime: {uptime}")
 
 
 bot.run(os.getenv("TOKEN"))

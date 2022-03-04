@@ -4,12 +4,12 @@ from Config._const import WARNING_APP, BRAIN
 
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 1,
-		"MAIN": "Command to automatically manage the warning sheet",
-		"FORMAT": "",
-		"CHANNEL": 0,
-		"USAGE": f"""W.I.P. help message!""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Staff"
+	    "COOLDOWN": 1,
+	    "MAIN": "Command to automatically manage the warning sheet",
+	    "FORMAT": "",
+	    "CHANNEL": 0,
+	    "USAGE": """W.I.P. help message!""".replace("\n", "").replace("\t", ""),
+	    "CATEGORY": "Staff",
 	}
 
 PERMS = 2 # Staff
@@ -134,9 +134,8 @@ async def MAIN(message, args, level, perms, SERVER):
 		await msg.add_reaction("🇳")
 
 		def check(r, u):
-			return (u == message.author
-			and str(r.emoji) in ["🇾","🇳"]
-			and r.message.id == msg.id)
+			return (u == message.author and str(r.emoji) in {"🇾", "🇳"}
+			        and r.message.id == msg.id)
 		
 		try:
 			r, _ = await BRAIN.wait_for('reaction_add', timeout=30, check=check)
@@ -170,9 +169,8 @@ async def MAIN(message, args, level, perms, SERVER):
 			await msg.add_reaction("🇳")
 			
 			def check(r, u):
-				return (u == message.author
-				and str(r.emoji) in ["🇾","🇳"]
-				and r.message.id == msg.id)
+				return (u == message.author and str(r.emoji) in {"🇾", "🇳"}
+				        and r.message.id == msg.id)
 			
 			try:
 				r, _ = await BRAIN.wait_for('reaction_add', timeout=30, check=check)

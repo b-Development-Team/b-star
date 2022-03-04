@@ -8,102 +8,161 @@ from Config._db import Database
 # won't look good either, so for now I'm keeping it here
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 2,
-		"MAIN": "Allows for playing and hosting MiniMiniTWOWs",
-		"FORMAT": "[subcommand]",
-		"CHANNEL": 3,
-		"USAGE": f"""Available subcommands: `queue`, `create`, `start`, `spectate`, `join`, `prompt`, `respond`, 
+	    "COOLDOWN":
+	    2,
+	    "MAIN":
+	    "Allows for playing and hosting MiniMiniTWOWs",
+	    "FORMAT":
+	    "[subcommand]",
+	    "CHANNEL":
+	    3,
+	    "USAGE":
+	    f"""Available subcommands: `queue`, `create`, `start`, `spectate`, `join`, `prompt`, `respond`, 
 		`vote`, `transfer`, `end`. Use `{PREFIX}help mmt [subcommand]` for more info on each of these subcommands.
-		""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Games",
-
-		"QUEUE": {
-			"MAIN": "Command for the MiniMiniTWOW hosting queue",
-			"FORMAT": "(list)",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt queue` adds you to the current hosting queue (or removes you from 
+		"""
+	    .replace("\n", "").replace("\t", ""),
+	    "CATEGORY":
+	    "Games",
+	    "QUEUE": {
+	        "MAIN":
+	        "Command for the MiniMiniTWOW hosting queue",
+	        "FORMAT":
+	        "(list)",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt queue` adds you to the current hosting queue (or removes you from 
 			the queue if you're already on it). Using `{PREFIX}mmt queue list` displays the current hosting queue. 
 			Once it's your turn on the queue, you'll be notified and have to create a MiniMiniTWOW by using
-			`{PREFIX}mmt create`.""".replace("\n", "").replace("\t", "")
-		},
-		"CREATE": {
-			"MAIN": "Command to create a MiniMiniTWOW",
-			"FORMAT": "",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt create` will create a MiniMiniTWOW. Can only be used if you're up first 
-			in the hosting queue.""".replace("\n", "").replace("\t", "")
-		},
-		"START": {
-			"MAIN": "Command to start a MiniMiniTWOW",
-			"FORMAT": "",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt start` will start MiniMiniTWOW, ending signups. Can only be used if 
-			you're the host, and there are 2 or more players.""".replace("\n", "").replace("\t", "")
-		},
-		"JOIN": {
-			"MAIN": "Command to join a MiniMiniTWOW",
-			"FORMAT": "",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt join` will sign you up to the current MiniMiniTWOW. If you're already 
+			`{PREFIX}mmt create`."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "CREATE": {
+	        "MAIN":
+	        "Command to create a MiniMiniTWOW",
+	        "FORMAT":
+	        "",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt create` will create a MiniMiniTWOW. Can only be used if you're up first 
+			in the hosting queue."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "START": {
+	        "MAIN":
+	        "Command to start a MiniMiniTWOW",
+	        "FORMAT":
+	        "",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt start` will start MiniMiniTWOW, ending signups. Can only be used if 
+			you're the host, and there are 2 or more players."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "JOIN": {
+	        "MAIN":
+	        "Command to join a MiniMiniTWOW",
+	        "FORMAT":
+	        "",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt join` will sign you up to the current MiniMiniTWOW. If you're already 
 			signed up, using this command removes you from the MiniMiniTWOW. Joining a MiniMiniTWOW automatically 
-			makes you a spectator.""".replace("\n", "").replace("\t", "")
-		},
-		"SPECTATE": {
-			"MAIN": "Command to spectate a MiniMiniTWOW",
-			"FORMAT": "",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt spectate` will make you a spectator of the current MiniMiniTWOW. If you're 
+			makes you a spectator."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "SPECTATE": {
+	        "MAIN":
+	        "Command to spectate a MiniMiniTWOW",
+	        "FORMAT":
+	        "",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt spectate` will make you a spectator of the current MiniMiniTWOW. If you're 
 			already a spectator, using this command makes you stop spectating. Once this command is used, starting the 
-			next voting period, you'll receive voting screens.""".replace("\n", "").replace("\t", "")
-		},
-		"PROMPT": {
-			"MAIN": "Command to spectate a MiniMiniTWOW",
-			"FORMAT": "[prompt]",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt prompt [prompt]` will set the current prompt. Only usable if the MiniMiniTWOW 
-			is currently inbetween rounds, and if you're the host.""".replace("\n", "").replace("\t", "")
-		},
-		"RESPOND": {
-			"MAIN": "Command to submit a MiniMiniTWOW response",
-			"FORMAT": "[response]",
-			"CHANNEL": 6,
-			"USAGE": f"""Using `{PREFIX}mmt respond [response]` will record your response to the current prompt. Only 
-			usable during submission period and if you're an alive contestant.""".replace("\n", "").replace("\t", "")
-		},
-		"VOTE": {
-			"MAIN": "Command to cast a MiniMiniTWOW vote",
-			"FORMAT": "[vote]",
-			"CHANNEL": 6,
-			"USAGE": f"""Using `{PREFIX}mmt vote [vote]` will record your vote to the screen you received. Only usable 
-			during voting period and if you received a voting screen.""".replace("\n", "").replace("\t", "")
-		},
-		"TRANSFER": {
-			"MAIN": "Command to transfer ownership of a MiniMiniTWOW to someone else",
-			"FORMAT": "[new_host] ('confirm')",
-			"CHANNEL": 4,
-			"USAGE": f"""Can be used to make someone else the new host of the current MiniMiniTWOW. Using `{PREFIX}mmt 
+			next voting period, you'll receive voting screens."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "PROMPT": {
+	        "MAIN":
+	        "Command to spectate a MiniMiniTWOW",
+	        "FORMAT":
+	        "[prompt]",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt prompt [prompt]` will set the current prompt. Only usable if the MiniMiniTWOW 
+			is currently inbetween rounds, and if you're the host."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "RESPOND": {
+	        "MAIN":
+	        "Command to submit a MiniMiniTWOW response",
+	        "FORMAT":
+	        "[response]",
+	        "CHANNEL":
+	        6,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt respond [response]` will record your response to the current prompt. Only 
+			usable during submission period and if you're an alive contestant."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "VOTE": {
+	        "MAIN":
+	        "Command to cast a MiniMiniTWOW vote",
+	        "FORMAT":
+	        "[vote]",
+	        "CHANNEL":
+	        6,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt vote [vote]` will record your vote to the screen you received. Only usable 
+			during voting period and if you received a voting screen."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "TRANSFER": {
+	        "MAIN":
+	        "Command to transfer ownership of a MiniMiniTWOW to someone else",
+	        "FORMAT":
+	        "[new_host] ('confirm')",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Can be used to make someone else the new host of the current MiniMiniTWOW. Using `{PREFIX}mmt 
 			transfer [new_host]` prompts a message asking you to confirm the transfer. Including `confirm` as an argument 
-			bypasses the confirmation message. `[new_host]` has to be a ping.""".replace("\n", "").replace("\t", "")
-		},
-		"END": {
-			"MAIN": "Command to end or vote to end a MiniMiniTWOW",
-			"FORMAT": "",
-			"CHANNEL": 4,
-			"USAGE": f"""Using `{PREFIX}mmt end` casts a vote to end a MiniMiniTWOW, or removes your vote if you had
+			bypasses the confirmation message. `[new_host]` has to be a ping."""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "END": {
+	        "MAIN":
+	        "Command to end or vote to end a MiniMiniTWOW",
+	        "FORMAT":
+	        "",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        f"""Using `{PREFIX}mmt end` casts a vote to end a MiniMiniTWOW, or removes your vote if you had
 			already cast one. If used by staff or the current host, the MiniMiniTWOW ends immediately. Otherwise, you 
 			must be a spectator to cast an end vote. The MiniMiniTWOW is ended if the number of spectator votes is 
 			higher than or equal to `ceil(s^(4/5) + 0.8)`, where `s` is the number of spectators. By virtue of this 
 			formula, it's impossible to end a MiniMiniTWOW by spectator vote with less than 4 spectators.
-			""".replace("\n", "").replace("\t", "")
-		},
-		"STATS": {
-			"MAIN": "Command to display the overall MiniMiniTWOW stats",
-			"FORMAT": "[stat]",
-			"CHANNEL": 4,
-			"USAGE": f"""Using this command allows you to view one of the statistics rankins for MMT. Available stats
-			that can go under the `[stat]` argument are `nr`, `points`, `wins`, and `roundwins`.
-			""".replace("\n", "").replace("\t", "")
-		},
+			"""
+	        .replace("\n", "").replace("\t", ""),
+	    },
+	    "STATS": {
+	        "MAIN":
+	        "Command to display the overall MiniMiniTWOW stats",
+	        "FORMAT":
+	        "[stat]",
+	        "CHANNEL":
+	        4,
+	        "USAGE":
+	        """Using this command allows you to view one of the statistics rankins for MMT. Available stats\x1f\t\t\tthat can go under the `[stat]` argument are `nr`, `points`, `wins`, and `roundwins`.\x1f\t\t\t"""
+	        .replace("\n", "").replace("\t", ""),
+	    },
 	}
 
 PERMS = 0 # Non-member
