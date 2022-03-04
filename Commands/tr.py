@@ -19,11 +19,10 @@ ALIASES = ["TR_"]
 REQ = []
 
 async def MAIN(message, args, level, perms, SERVER):
-	if level != 1:
-		if args[1].lower() == "queue" and perms == 2:
-			await message.channel.send(open("Config/_image_gen.txt", "r").read())
-			return
-	
+	if level != 1 and args[1].lower() == "queue" and perms == 2:
+		await message.channel.send(open("Config/_image_gen.txt", "r").read())
+		return
+
 	tr_gen = open("Config/_image_gen.txt", "r").read()
 	tr_gen += f" {message.id}"
 	open("Config/_image_gen.txt", "w").write(tr_gen.strip())
@@ -53,11 +52,11 @@ async def MAIN(message, args, level, perms, SERVER):
 
 	face_position = min(309, 
 		int(image_pixels/2) - 312)
-	
+
 	tr_base.paste(face, (0, face_position), mask=face)
 
 	ratio = 250 / image_pixels
-	
+
 	tr_base = tr_base.resize((int(1440 * ratio), int(image_pixels * ratio)), Image.ANTIALIAS)
 	w = 1440 * ratio
 	h = int(image_pixels * ratio)
@@ -107,14 +106,14 @@ async def MAIN(message, args, level, perms, SERVER):
 	pixels_per_height = 250 / height
 
 	references = []
-	for scale in scale_objects.keys():
-		if 0.2 * height < scale_objects[scale] < 1.15 * height:
+	for scale, value in scale_objects.items():
+		if 0.2 * height < value < 1.15 * height:
 			img = Image.open(f"Images/{scale}.png").convert("RGBA")
 			ratio = (pixels_per_height * scale_objects[scale]) / img.height
 			img = img.resize((int(img.width * ratio), int(img.height * ratio)))
 
 			references.append([scale, img, img.width, img.height])
-	
+
 	to_scale = []
 
 	while True:
@@ -123,8 +122,8 @@ async def MAIN(message, args, level, perms, SERVER):
 		for ref in references:
 			if ref[2] + current_w <= 790:
 				possible_ref.append(ref)
-		
-		if len(possible_ref) == 0:
+
+		if not possible_ref:
 			break
 
 		ref = random.choice(possible_ref)
@@ -136,21 +135,14 @@ async def MAIN(message, args, level, perms, SERVER):
 		if scale_objects[ref[0]] > 1000:
 			scale_objects[ref[0]] = scale_objects[ref[0]] / 1000
 			prefix = "k"
-		
+
 		to_scale.append(f"**`{ref[0]}`** ({scale_objects[ref[0]]}{prefix}m tall)")
 		references.remove(ref)
 
-	if len(to_scale) != 0:
-		to_scale = "To scale: " + grammar_list(to_scale)
-	else:
-		to_scale = ""
-
+	to_scale = f"To scale: {grammar_list(to_scale)}" if to_scale else ""
 	to_post.save("Images/generated tr_.png")
 
-	width_note = ""
-	if height >= 10:
-		width_note = "*(tr_ width not to scale)*"
-
+	width_note = "*(tr_ width not to scale)*" if height >= 10 else ""
 	prefix = ""
 	if height > 1000:
 		height = height / 1000

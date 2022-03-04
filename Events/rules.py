@@ -52,12 +52,10 @@ class EVENT:
 
 		# Rule 2. Vowels are essential to many English words! Every message you send must have at least one vowel in it (including the letter “y”)
 		vowels = ["a", "e", "i", "o", "u", "y"]
-		c = 0
-		for chr in list(message.lower()):
-			if chr in vowels: c += 1
+		c = sum(chr in vowels for chr in list(message.lower()))
 		if c == 0:
 			broken.append("2")
-		
+
 		# Rule 3. I don’t like the verbosity meta in TWOW right now; you can only use words that are 8 characters or less!
 		lengths = [len(x) for x in message.split(" ")]
 		if max(lengths) > 8 :
@@ -74,7 +72,7 @@ class EVENT:
 		# Rule 6. Once again, the number 3 sucks lmfao; You can’t use the letter C.
 		if "c" in message.lower():
 			broken.append("6")
-		
+
 		# Rule 7. You have to be obedient to everything. No negative answers. You can’t use the words: “no”, “nope”, “never”, “nah”, “disagree”, “na”
 		banned_words = ["no", "nope", "never", "nah", "disagree"]
 		for word in banned_words:
@@ -88,15 +86,15 @@ class EVENT:
 			if word in message.lower().split(" "):
 				broken.append("8")
 				break
-		
+
 		# Rule 9. You can’t have a character count that’s above 60 characters. Once again, the verbosity meta sucks.
-		if 60 < len(message):
+		if len(message) > 60:
 			broken.append("9")
-		
+
 		# Rule 10. You can’t use more than 9 vowels in your message.
 		if c > 9:
 			broken.append("10")
-		
+
 		print(broken)
 		return broken
 	
@@ -139,9 +137,7 @@ class EVENT:
 			pl_index = self.param["PLAYER_INFO"].index(player_info)
 
 			# The two different cases of Rule 1
-			if self.param["FINAL_5"]: t = 45
-			else: t = 90
-
+			t = 45 if self.param["FINAL_5"] else 90
 			if time.time() - player_info[2] > t: # If the player went too long without sending messages...
 				# Remove role, announce elimination, mark player as eliminated
 				await self.SERVER["MAIN"].get_member(player_info[0]).remove_roles(self.param["ROLE"])
@@ -149,16 +145,16 @@ class EVENT:
 
 				self.param["PLAYER_INFO"][pl_index][0] = 0
 				self.param["PLAYER_IDS"][pl_index] = 0
-			
+
 		# If the final 5 has been reached
 		if len([p for p in self.param["PLAYER_IDS"] if p != 0]) <= 5 and not self.param["FINAL_5"]:
 			self.param["FINAL_5"] = True
 
 			for p in self.param["PLAYER_INFO"]:
 				p[2] = time.time()
-			
+
 			await self.param["LOGGING"].send("**Five players remain.** The threshold for Rule 1 is now multiplied by 0.5.")
-		
+
 		# Remove eliminated players from the lists
 		self.param["PLAYER_IDS"] = [p for p in self.param["PLAYER_IDS"] if p != 0]
 		self.param["PLAYER_INFO"] = [p for p in self.param["PLAYER_INFO"] if p[0] != 0]
@@ -170,7 +166,7 @@ class EVENT:
 		if len(self.param["PLAYER_IDS"]) == 0: # End the game with no winner
 			await self.param["LOGGING"].send("Everyone has been eliminated! The event is over.")
 			self.RUNNING = False
-		
+
 		return self.RUNNING # Serves as a check of whether or not the event has ended
 	
 
@@ -184,10 +180,10 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return

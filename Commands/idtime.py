@@ -55,15 +55,12 @@ async def MAIN(message, args, level, perms, SERVER):
 			unix_list.append(snowflaketime)
 			if mode == "timestamp":
 				ft = str(datetime.datetime.fromtimestamp(snowflaketime))
-				if ft.endswith("000"):
-					ft = ft[:-3]
-				else:
-					ft = ft + ".000"
-				format_list.append(ft + " UTC")
+				ft = ft[:-3] if ft.endswith("000") else f'{ft}.000'
+				format_list.append(f'{ft} UTC')
 			elif mode == "unix":
 				format_list.append(str(snowflaketime))
 		for i in range(len(snowflake_list)):
-			output += (str(snowflake_list[i]) + " → **" + format_list[i] + "**")
+			output += f'{str(snowflake_list[i])} → **{format_list[i]}**'
 			output += "\n"
 		if len(snowflake_list) > 1:
 			ds = abs(unix_list[0] - unix_list[1])
@@ -76,7 +73,7 @@ async def MAIN(message, args, level, perms, SERVER):
 			diff[1] = str(diff[1]).zfill(2)
 			diff[2] = str(diff[2]).zfill(2)
 			sec = str(diff[3]).split(".")
-			diff[3] = sec[0].zfill(2) + "." + sec[1].ljust(3, '0')
+			diff[3] = f'{sec[0].zfill(2)}.' + sec[1].ljust(3, '0')
 			output += "Difference: **" + (":".join(diff)).lstrip("0:") + "**"
 		elif len(snowflake_list) == 0:
 			await message.channel.send("Invalid ID.")

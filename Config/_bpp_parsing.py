@@ -19,7 +19,7 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 			else: # If it's not, the next character will be backslashed
 				backslash = True
 			continue
-		
+
 		if char == "(":
 			if backslash: # If the parenthesis is backslashed, append it as a normal character
 				expression[current_var_index][1] += "\\"
@@ -32,7 +32,7 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 
 				expression.append([current_level, "("]) # Add a new expression with the new level
 			continue
-		
+
 		if char == ")":
 			if backslash: # Again, if the parenthesis is backslashed, append it as a normal character
 				expression[current_var_index][1] += "\\"
@@ -41,26 +41,26 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 
 			elif current_level == 0: # Throw an error if there's an imbalance in the parenthesis level
 				raise SyntaxError("Unbackslashed closing parentheses without any opening parentheses.")
-			
+
 			# If it's not backslashed and it's valid...
 			expression[current_var_index][1] += ")" # Append it to the end of the current expression
 			current_level -= 1 # Go a level down
 			continue
-		
+
 		if char == ";":
 			expression[current_var_index][1] += char
 			backslash = False
 			continue
-		
+
 		if backslash: # If this character is backslashed but it's not a character that needs special escaping
 			# with backslashes (like parentheses), just add the backslash before adding the character
 			expression[current_var_index][1] += "\\"
 			backslash = False # End the backslash
 
 		expression[current_var_index][1] += char # Add the character
-	
+
 	# We're going to move top down for this, so start with the highest index in the whole expression array
-	starting_index = max([x[0] for x in expression])
+	starting_index = max(x[0] for x in expression)
 
 	for counting_up in range(starting_index + 1):
 		# Across iterations, will range from starting_index to 0
@@ -79,42 +79,38 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 					if operation_info[0] == "out": # If that operation is out{}...
 						if var:
 							raise TypeError("Cannot call variable as an out{} operation")
-						
-						new_op_info = operation_check(operation_info[1][1:-1]) # Run the operation checker in the
-						# contents of out{} to solve an operation inside (this is not meant to be done for variables)
-						
-						if new_op_info[0]: # If the operation went fine
 
-							if type(new_op_info[1]) == list:
-								new_op_info[1] = list_to_array(new_op_info[1])
+						new_op_info = operation_check(operation_info[1][1:-1]) # Run the operation checker in the
+						if type(new_op_info[1]) == list:
+							new_op_info[1] = list_to_array(new_op_info[1])
+
+						# contents of out{} to solve an operation inside (this is not meant to be done for variables)
+
+						if new_op_info[0]: # If the operation went fine
 
 							try:
 								if "\t" in new_op_info[1]:
 									new_op_info[1] = new_op_info[1].replace("\t", ";")
 							except TypeError:
 								pass
-							
+
 							OUTPUT += str(new_op_info[1]) # Add the result of above to the output
 							return [new_op_info[1], OUTPUT] # End the line here - out{} operations are final
 
-						elif not new_op_info[0]: # If there's no operation, just add the old result to OUTPUT
-
-							if type(new_op_info[1]) == list:
-								new_op_info[1] = list_to_array(new_op_info[1])
-
+						else:
 							try:
 								if "\t" in operation_info[1]:
 									operation_info[1] = operation_info[1].replace("\t", ";")
 							except TypeError:
 								pass
-							
+
 							OUTPUT += str(operation_info[1][1:-1]) # When there's no operation, parentheses are removed
 							return [operation_info[1][1:-1], OUTPUT]
 
 						# If it gets here, that means there was an operation but there was an error
 						operation_info = new_op_info # Replace new_op_info with operation_info
-						# It'll go through the if operation_info[2] checker below and the error will be reported
-					
+											# It'll go through the if operation_info[2] checker below and the error will be reported
+
 					'''if operation_info[2]: # If there was an error with the operation...
 						operation = operation_info[1][0]
 						operation_f = operation.replace("_", " ").strip().replace("\\", "")
@@ -125,7 +121,7 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 						raise TypeError( # Raise the error
 						f"Operation `{operation_f}` expected type {expected_types}, but `{param}` can't fit said type")
 						'''
-					
+
 					# If it got here, that means the operation was successful and is not out{}
 					result = operation_info[1] # Define the result
 					if type(result) == list: 
@@ -142,7 +138,7 @@ def parenthesis_parser(raw, VARIABLES, OUTPUT, var=False):
 
 				else: # If r == 0 and it's not an operation, pass the expression unchanged
 					result = expression_to_solve
-				
+
 				if r == 0: # If r == 0, last operation; whatever the result, it's the result of the entire line
 					final_result = result
 

@@ -54,21 +54,20 @@ def ARRAY(*a):
 
 def CONCAT(*a):
 	all_type = None
-	
+
 	for a1 in a:
 		if type(a1) in [int, float]: a1 = str(a1)
 		if all_type is None: all_type = type(a1)
 		elif type(a1) != all_type:
 			raise TypeError("CONCAT parameters must either be all arrays or all strings")
-	
+
 	if all_type == str:
 		a = [str(a1) for a1 in a]
 		return ''.join(a)
-	if all_type == list:
-		a = list(itertools.chain(*a))
-		return a
-	else:
+	if all_type != list:
 		raise IndexError("Cannot call CONCAT function with no arguments")
+	a = list(itertools.chain(*a))
+	return a
 
 def LENGTH(a):
 	if type(a) in [int, float]: a = str(a)
@@ -147,10 +146,7 @@ def CHOOSECHAR(a):
 def IF(a, b, c):
 	a = a not in [0, "0"]
 
-	if a:
-		return b
-	else:
-		return c
+	return b if a else c
 
 def COMPARE(a, b, c):
 	operations = [">", "<", ">=", "<=", "!=", "="]
@@ -161,7 +157,7 @@ def COMPARE(a, b, c):
 	if is_number(c): c = float(c)
 
 	if operations.index(b) <= 3 and type(a) != type(c):
-		raise TypeError(f"Entries to compare in COMPARE function are not the same type")
+		raise TypeError("Entries to compare in COMPARE function are not the same type")
 
 	if b == ">": return int(a > c)
 	if b == "<": return int(a < c)
@@ -179,7 +175,8 @@ def MOD(a, b):
 	a = int(a) if is_whole(a) else float(a)
 	b = int(b) if is_whole(b) else float(b)
 
-	if b == 0: raise ZeroDivisionError(f"Second parameter of MOD function cannot be zero")
+	if b == 0:
+		raise ZeroDivisionError("Second parameter of MOD function cannot be zero")
 
 	return a % b
 
@@ -206,9 +203,11 @@ def MATH(a, b, c):
 		return a*c
 
 	if b == "/":
-		if c == 0: raise ZeroDivisionError(f"Second parameter of MATH function in division cannot be zero")
+		if c == 0:
+			raise ZeroDivisionError(
+			    "Second parameter of MATH function in division cannot be zero")
 		return a/c
-	
+
 	if b == "^":
 		if abs(a) > 1024:
 			raise ValueError(f"First parameter of MATH function too large to safely exponentiate: {safe_cut(a)} (limit 1024)")

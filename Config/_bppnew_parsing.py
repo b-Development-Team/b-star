@@ -156,7 +156,7 @@ def run_bpp_program(code, p_args, author, runner):
 			k1 = v[0]
 			functions[k] = evaluate_result(k1)
 			return functions[k]
-		
+
 		args = v[1:]
 
 		for i, a in enumerate(args):
@@ -165,7 +165,7 @@ def run_bpp_program(code, p_args, author, runner):
 			if type(a) == tuple:
 				k1 = a[0]
 				functions[k][i+1] = evaluate_result(k1)
-		
+
 		args = v[1:]
 
 		result = FUNCTIONS[v[0]](*args)
@@ -194,8 +194,6 @@ def run_bpp_program(code, p_args, author, runner):
 					v_value = express_array(result[1]) if type(result[1]) == list else result[1]
 
 					db.add_entry("b++2variables", [v_name, str(v_value), var_type(v_value), str(author)])
-					result = ""
-
 				else:
 					v_list = db.get_entries("b++2variables", columns=["name", "owner"])
 					v_owner = [v for v in v_list if v_name == v[0]][0][1]
@@ -203,13 +201,13 @@ def run_bpp_program(code, p_args, author, runner):
 					if v_owner != str(author):
 						raise PermissionError(
 						f"Only the author of the {v_name} variable can edit its value ({v_owner})")
-					
+
 					db.edit_entry(
 						"b++2variables",
 						entry={"value": str(result[1]), "type": var_type(result[1])},
 						conditions={"name": v_name})
-					result = ""
-				
+				result = ""
+
 			elif result[0] == "gv":
 				v_name = args[0]
 
@@ -227,7 +225,7 @@ def run_bpp_program(code, p_args, author, runner):
 
 			elif result[0] == "id":
 				result = runner.id
-		
+
 		functions[k] = result
 		return result
 

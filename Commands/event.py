@@ -24,82 +24,77 @@ async def MAIN(message, args, level, perms, SERVER):
 	if level == 1:
 		await message.channel.send("Include events to call!")
 		return
-	
+
 	if args[1].lower() == "list": # List the events from the dict
 		event_list = [f'`{x}` - **{"ON" if SERVER["EVENTS"][x].RUNNING else "OFF"}**\n' for x in SERVER["EVENTS"].keys()]
 		await message.channel.send(f"Here is a list of bot events:\n\n{''.join(event_list)}")
 		return
-	
+
 	if args[1].upper() not in SERVER["EVENTS"].keys(): # Event doesn't exist
 		await message.channel.send("Invalid event.")
 		return
 
 	event = args[1].upper()
 
-	if level != 2: # If it's not just `tc/event [event_name]`, check for subcommands
-		if args[2].lower() == "edit":
-			if not SERVER["EVENTS"][event].RUNNING:
-				await message.channel.send("You can only change an event that's currently running.")
-				return
-			
-			parsing_index = 0 # Helps detect keywords and the brackets' boundaries
-			config_dict = {} # Stores the values to be changed
-			no_value = [] # Stores keywords that the user didn't provide values for, so they can be specified later
+	if level != 2 and args[2].lower() == "edit":
+		if not SERVER["EVENTS"][event].RUNNING:
+			await message.channel.send("You can only change an event that's currently running.")
+			return
 
-			while True: # Advances through the entire message until break is activated
+		parsing_index = 0 # Helps detect keywords and the brackets' boundaries
+		config_dict = {} # Stores the values to be changed
+		no_value = [] # Stores keywords that the user didn't provide values for, so they can be specified later
 
-				found = message.content[parsing_index + 1:].find("[")
-				if found == -1: # If you can't find [ anymore, parsing is over
-					break
+		while True: # Advances through the entire message until break is activated
 
-				parsing_index += found + 2 # Brings parsing_index to the index of the character after [
+			found = message.content[parsing_index + 1:].find("[")
+			if found == -1: # If you can't find [ anymore, parsing is over
+				break
 
-				reach_index = parsing_index + message.content[parsing_index + 1:].find("]") + 1
-				# Brings reach_index to the next ]
+			parsing_index += found + 2 # Brings parsing_index to the index of the character after [
 
-				# Contents of the brackets
-				config_args = message.content[parsing_index:reach_index].split(" ")
+			reach_index = parsing_index + message.content[parsing_index + 1:].find("]") + 1
+			# Brings reach_index to the next ]
 
-				if len(config_args) == 0:
-					continue # If it's just [], then there's nothing to do here
+			# Contents of the brackets
+			config_args = message.content[parsing_index:reach_index].split(" ")
 
-				key = config_args[0] # By default, the first word in the brackets is the parameter key
+			if len(config_args) == 0:
+				continue # If it's just [], then there's nothing to do here
 
-				if len(config_args) == 1: # If it's the *only* word, then no value was specified
-					no_value.append(key)
-					continue
+			key = config_args[0] # By default, the first word in the brackets is the parameter key
 
-				elif len(config_args) == 2: # If it's two words, the value is a string of the second word
-					if is_whole(config_args[1]):
-						value = int(config_args[1])
-					elif is_float(config_args[1]):
-						value = float(config_args[1])
-					else:
-						value = config_args[1]
+			if len(config_args) == 1: # If it's the *only* word, then no value was specified
+				no_value.append(key)
+				continue
 
-				else: # If it's more than two words, the value is a list of all words past the first one
-					value = config_args[1:]
-				
-				# Update the config_dict with the new value
-				config_dict[key] = value
-			
-			if len(config_dict.keys()) == 0: # If no parameters were found
-				await message.channel.send("Include parameters you want to edit!")
-				return
-			
-			if len(no_value) > 0: # If there are parameters whose value weren't specified
-				await message.channel.send(f"Include the new value for {grammar_list(no_value)}!")
-				return
-			
-			await SERVER["EVENTS"][event].edit_event(message, config_dict)
-			return # If everything went alright, edit the event parameters
-	
+			elif len(config_args) == 2: # If it's two words, the value is a string of the second word
+				if is_whole(config_args[1]):
+					value = int(config_args[1])
+				elif is_float(config_args[1]):
+					value = float(config_args[1])
+				else:
+					value = config_args[1]
+
+			else: # If it's more than two words, the value is a list of all words past the first one
+				value = config_args[1:]
+
+			# Update the config_dict with the new value
+			config_dict[key] = value
+
+		if len(config_dict.keys()) == 0: # If no parameters were found
+			await message.channel.send("Include parameters you want to edit!")
+			return
+
+		if no_value: # If there are parameters whose value weren't specified
+			await message.channel.send(f"Include the new value for {grammar_list(no_value)}!")
+			return
+
+		await SERVER["EVENTS"][event].edit_event(message, config_dict)
+		return # If everything went alright, edit the event parameters
+
 	# If the command is purely `tc/event [event_name]`, it interprets as to toggle the event
-	if SERVER["EVENTS"][event].RUNNING:
-		action = "END"
-	else:
-		action = "START"
-
+	action = "END" if SERVER["EVENTS"][event].RUNNING else "START"
 	# Confirmation can be bypassed by including `confirm` as an argument in the command
 	if "confirm" not in [x.lower() for x in args]:
 		await message.channel.send(f"""To confirm that you want to **{action} {event}**, send `confirm` in this channel.

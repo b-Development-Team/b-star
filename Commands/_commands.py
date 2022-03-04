@@ -9,8 +9,8 @@ file_list = [x[:-3] for x in os.listdir("Commands") if x.endswith(".py") and not
 
 for command_file in file_list:
 	try:
-		info = importlib.import_module("Commands." + command_file)
-		
+		info = importlib.import_module(f"Commands.{command_file}")
+
 		COMMANDS[command_file.upper()] = { # These variable names are standardized on each script file
 			"MAIN": info.MAIN, # The function to call to run the command
 			"HELP": info.HELP, # The tc/help info for the command

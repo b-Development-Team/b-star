@@ -45,7 +45,7 @@ class EVENT:
 				tz_time = current_time + timedelta(hours=timezone)
 				tz_info.append(f"{tz_time.day}/{tz_time.month}")
 				tz_info.append(tz_time) # The day is the second element of the list
-			
+
 				day_change_tz.append(tz_info)
 
 		print(day_change_tz)
@@ -55,7 +55,7 @@ class EVENT:
 
 			n_d = f"{n_d.day}/{n_d.month}"
 			l_d = f"{l_d.day}/{l_d.month}"
-			
+
 			'''
 			# All people whose birthdays were yesterday
 			found = self.db.get_entries("birthday", columns=["id", "timezone"], conditions={"birthday": l_d})
@@ -123,7 +123,7 @@ class EVENT:
 			print("More birthday:", found)
 			if len(found) == 0: # If there are none, return
 				return
-			
+
 			# If there are members, cycle through each of them.
 			for member in found:
 				if self.BIRTHDAY_ROLE in self.SERVER["MAIN"].get_member(int(member[0])).roles:
@@ -135,12 +135,12 @@ class EVENT:
 
 			found = [x for x in found if x != 0] # Remove those who already had their birthday counted to avoid
 			# birthday ping repeats.
-			
+
 			print("Actual birthday announcements:", found)
 
-			if len(found) == 0:
+			if not found:
 				return # If nobody's birthday is supposed to be announced now, return
-			
+
 			# Specify the timezone the bot is covering in this message
 			f_tz = ("+" if tz[0] > 0 else "") + str(tz[0])
 
@@ -160,10 +160,10 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return

@@ -26,7 +26,7 @@ async def MAIN(message, args, level, perms, SERVER):
 		await message.channel.send(
 			"Pick a mode for the guessing game! Current available modes are `simple`, `factors` and `digits`.")
 		return
-	
+
 	mode = args[1].lower()
 
 	if level == 2:
@@ -34,7 +34,7 @@ async def MAIN(message, args, level, perms, SERVER):
 	elif not is_whole(args[2]):
 		await message.channel.send("Pick an integer between 2 and 1000000000 for the upper bound!")
 		return
-	elif 2 > int(args[2]) or int(args[2]) > 1000000000:
+	elif int(args[2]) < 2 or int(args[2]) > 1000000000:
 		await message.channel.send("Pick an integer between 2 and 1000000000 for the upper bound!")
 		return
 	elif int(args[2]) > 100000 and mode == "factors":
@@ -42,7 +42,7 @@ async def MAIN(message, args, level, perms, SERVER):
 		return
 	else:
 		upper_bound = int(args[2])
-	
+
 	number = random.randint(1, upper_bound)
 
 	hint = ""
@@ -50,30 +50,26 @@ async def MAIN(message, args, level, perms, SERVER):
 	if mode != "simple":
 		if mode == "digits":
 			hint = list(str(number))
-			blanks = random.sample(range(len(hint)), int(len(hint)/2))
+			blanks = random.sample(range(len(hint)), len(hint) // 2)
 			for ind in blanks:
 				hint[ind] = "█"
 			hint = f"**{''.join(hint)}**"
-		
+
 		elif mode == "factors":
-			factors = []
-			for i in range(2, number):
-				if number % i == 0:
-					factors.append(i)
-			
-			if len(factors) == 0:
+			factors = [i for i in range(2, number) if number % i == 0]
+			if not factors:
 				hint = "The number is prime!"
 			elif len(factors) == 1:
 				hint = "The number is a perfect square (only one non-trivial factor)."
 			else:
 				factor_list = ", ".join([str(x) for x in random.sample(factors, 2)])
 				hint = f"Two of its factors are **{factor_list}**."
-		
+
 		else:
 			await message.channel.send(
 				"That mode does not exist! Current available modes are `simple`, `factors` and `digits`.")
 			return
-	
+
 		hint = f"**Number Hint** : {hint}"
 
 	await message.channel.send(f"""**Generated a number between 1 and {upper_bound}.** Send a guess for the number!
@@ -85,11 +81,11 @@ async def MAIN(message, args, level, perms, SERVER):
 	if not is_whole(msg.content):
 		await message.channel.send("Invalid number. Guess command cancelled.")
 		return
-	
+
 	guess = int(msg.content)
 
 	result = "**You've guessed correctly!**" if guess == number else "You were wrong."
-	
+
 	await message.channel.send(f"""{message.author.mention} {result}
 	The number generated between **1** and **{upper_bound}** was **{number}**.
 	Your guess was **{guess}**.

@@ -103,10 +103,7 @@ def is_whole(s):
 	try:
 		es = int(s)
 		es2 = float(s)
-		if es2 - es == 0:
-			return True
-		else:
-			return False
+		return es2 - es == 0
 	except:
 		return False
 
@@ -116,10 +113,7 @@ def is_float(s):
 	try:
 		es = int(s)
 		es2 = float(s)
-		if es2 - es != 0:
-			return True
-		else:
-			return False
+		return es2 - es != 0
 	except:
 		try:
 			es2 = float(s)
