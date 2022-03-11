@@ -79,14 +79,12 @@ class Database:
 	def get_entries(self, table, limit=None, columns=[], conditions={}):
 		if table not in self.get_tables():
 			raise NameError(f"The table {table} is not in the database.")
-		
+
 		if len(columns) != 0: # If there are specific columns to search for
 			table_columns = self.get_columns(table) # Make sure they exist
-			invalid_columns = [x for x in columns if x not in table_columns]
-
-			if len(invalid_columns) > 0: # If there are invalid columns...
+			if invalid_columns := [x for x in columns if x not in table_columns]:
 				raise NameError(f"The following columns are not in {table}: {grammar_list(invalid_columns)}")
-		
+
 		else: # If no columns were specified, gather all of them.
 			columns = ["*"]
 
@@ -105,19 +103,18 @@ class Database:
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				))
-			
+
 			else: # If there are conditions, use WHERE and formatting to specify them.
 				sql_query += "WHERE " + ' AND '.join([f"{col} = %s" for col in conditions.keys()])
-				
+
 				if limit is not None:
 					sql_query += f" LIMIT {limit} "
 
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				), list(conditions.values()))
-			
-			output = cursor.fetchall()
-			return output
+
+			return cursor.fetchall()
 	
 
 	# Adds a table. Example: db.add_table("bigredbutton", [["button", "integer"], ["info", "text"]])
@@ -202,14 +199,14 @@ class Database:
 	def remove_entry(self, table, conditions={}):
 		if table not in self.get_tables():
 			raise NameError(f"The table {table} is not in the database.")
-		
+
 		if len(conditions.keys()) != 0: # If there are condition columns
 			table_columns = self.get_columns(table) # Make sure those columns exist
-			invalid_columns = [x for x in conditions.keys() if x not in table_columns]
-
-			if len(invalid_columns) > 0: # If there are invalid columns...
+			if invalid_columns := [
+			    x for x in conditions.keys() if x not in table_columns
+			]:
 				raise NameError(f"The following columns are not in {table}: {grammar_list(invalid_columns)}")
-		
+
 		full_name = f"public.{table}" # Schema name
 
 		sql_query = " DELETE FROM {} " # Specify only the table until it's checked that there are conditionals
@@ -222,14 +219,14 @@ class Database:
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				))
-			
+
 			else: # If there are conditions, express them through the WHERE function
 				sql_query += "WHERE " + ' AND '.join([f"{col} = %s" for col in conditions.keys()])
 
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				), list(conditions.values()))
-			
+
 			return
 
 
@@ -240,22 +237,19 @@ class Database:
 	def edit_entry(self, table, entry={}, conditions={}):
 		if table not in self.get_tables():
 			raise NameError(f"The table {table} is not in the database.")
-		
+
 		if len(entry.keys()) == 0: # There must be at least one column you want to edit
 			raise IndexError("You haven't selected any columns to edit.")
-		
+
 		full_name = f"public.{table}" # Schema name
 		table_columns = self.get_columns(table) # Detect invalid columns even if there are none in conditions
-		# Because there's guaranteed to be columns in entry
-		invalid_columns = [x for x in list(conditions.keys()) + list(entry.keys()) if x not in table_columns]
-
-		if len(invalid_columns) > 0: # If there are invalid columns...
+		if invalid_columns := [
+		    x for x in list(conditions.keys()) + list(entry.keys())
+		    if x not in table_columns
+		]:
 			raise NameError(f"The following columns are not in {table}: {grammar_list(invalid_columns)}")
-		
-		entry_edits = []
-		for column in entry.keys():
-			entry_edits.append(f"{column} = %s")
 
+		entry_edits = [f"{column} = %s" for column in entry.keys()]
 		# Query for unconditional editing
 		sql_query = " UPDATE {} SET " + ", ".join(entry_edits)
 
@@ -267,12 +261,12 @@ class Database:
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				), list(entry.values()))
-			
+
 			else: # If there are conditions, express them through the WHERE statement
 				sql_query += "WHERE " + ' AND '.join([f"{col} = %s" for col in conditions.keys()])
 
 				cursor.execute(sql.SQL(sql_query).format(
 					sql.Identifier(full_name)
 				), list(entry.values()) + list(conditions.values()))
-			
+
 			return

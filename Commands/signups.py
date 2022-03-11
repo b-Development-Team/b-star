@@ -4,12 +4,12 @@ from Config._db import Database
 
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 2,
-		"MAIN": "Command to manage the #twows-in-signups channel",
-		"FORMAT": "wip",
-		"CHANNEL": 0,
-		"USAGE": f"""wip""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Staff"
+	    "COOLDOWN": 2,
+	    "MAIN": "Command to manage the #twows-in-signups channel",
+	    "FORMAT": "wip",
+	    "CHANNEL": 0,
+	    "USAGE": """wip""".replace("\n", "").replace("\t", ""),
+	    "CATEGORY": "Staff",
 	}
 
 PERMS = 2 # Staff

@@ -3,13 +3,13 @@ import discord
 
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 0,
-		"HIDE": True,
-		"MAIN": "Talk.",
-		"FORMAT": "",
-		"CHANNEL": 0,
-		"USAGE": f"""Talk.""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Staff"
+	    "COOLDOWN": 0,
+	    "HIDE": True,
+	    "MAIN": "Talk.",
+	    "FORMAT": "",
+	    "CHANNEL": 0,
+	    "USAGE": """Talk.""".replace("\n", "").replace("\t", ""),
+	    "CATEGORY": "Staff",
 	}
 
 PERMS = 3 # Developer

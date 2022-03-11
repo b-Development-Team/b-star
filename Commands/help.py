@@ -22,7 +22,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 	# Embed color is constant
 	embed = discord.Embed(color=0x31D8B1)
 	com = list(COMMANDS.keys())
-	
+
 	alias_list = {}
 	for c in com:
 		for a in COMMANDS[c]['ALIASES']:
@@ -64,7 +64,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 				if comcat not in comlist.keys():
 					comlist[comcat] = []
 				comlist[comcat].append(c)
-		
+
 		categories = list(comlist.keys())
 		for cat in categories:
 			if cat not in ci.keys():
@@ -72,25 +72,24 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 		categories = sorted(categories, key = lambda x: ci[x])
 
 		for cat in categories:
-			values = ""
 			comlist[cat].sort()
-			for cn in comlist[cat]:
-				values += "`" + SERVER["PREFIX"] + cn.lower() + "`\n"
+			values = "".join(
+			    "`" + SERVER["PREFIX"] + cn.lower() + "`\n" for cn in comlist[cat])
 			embed.add_field(name=cat, value=values)
 
 		await message.channel.send(embed=embed)
 		return
-	
+
 	# COMMANDS keys are in uppercase so this is helpful
 	c = args[1].upper()
-	
-	if c in alias_list.keys(): # Checks list of aliases in case user input an alias to get help for
+
+	if c in alias_list: # Checks list of aliases in case user input an alias to get help for
 		c = alias_list[c]
-	
+
 	if c not in com:
 		await message.channel.send("Invalid command to get help for!")
 		return
-	
+
 	# I might remake this part later because it feels too hardcodey. Corresponds to ["HELP"]["CHANNEL"] of each command
 	channel_list = [
 		"Can be used in DMs, bot or game channels",
@@ -104,7 +103,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 
 	# Usage perms
 	perms = COMMANDS[c]['PERMS']
-	
+
 	if level == 2:
 		# Title is the command syntax, description is the basic info on the command
 		embed.title = f"{SERVER['PREFIX']}{c.lower()}"
@@ -126,7 +125,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 			embed.add_field(name="\u200b", value=COMMANDS[c]["HELP"](SERVER['PREFIX'])["USAGE2"] + "\n\u200b", inline=False)
 		except:
 			pass
-		
+
 		embed.add_field(name="Cooldown Time", value=f'{COMMANDS[c]["HELP"](SERVER["PREFIX"])["COOLDOWN"]}sec \n\u200b', inline=False)
 
 		# Conditions are usage permissions followed by channel permissions (as denoted in channel_list)
@@ -136,7 +135,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 		# Usually, after every multiline string I have to add .replace("\n", "").replace("\t", "") because I don't
 		# want the newlines and tabs to actually show up. Here, there's actually an intended newline, so I just
 		# separate the two lines in the script file and I only erase the tab characters
-	
+
 	else:
 		# Most of this else code is copy pasted from the above, adapted with the `sc` variable instead of `c`
 		# Not much else to say for this part other than what's above
@@ -146,7 +145,7 @@ async def MAIN(message, args, level, perms, SERVER, COMMANDS):
 		if sc not in COMMANDS[c]["HELP"](SERVER['PREFIX']).keys():
 			await message.channel.send(f"Invalid `{c.lower()}` subcommand to get help for!")
 			return
-		
+
 		embed.title = f"{(SERVER['PREFIX'])}{c.lower()} {sc.lower()}"
 		embed.description = COMMANDS[c]["HELP"](SERVER['PREFIX'])[sc]["MAIN"] + "\n\u200b"
 

@@ -6,15 +6,19 @@ import discord
 
 def HELP(PREFIX):
 	return {
-		"COOLDOWN": 3,
-		"MAIN": "Allows you to write short tags and/or programs with a simplified instruction set",
-		"FORMAT": "[subcommand]",
-		"CHANNEL": 0,
-		"USAGE": f"""The full documentation for all B++ functionality is displayed in this document:
-		**NOTE: THIS IMPLEMENTATION OF B++ IS OUTDATED AND MAY BE SOON DISABLED.**
-		https://docs.google.com/document/d/1-UOafQ0qW0AzpR1xxCYU_2__VulfofMDeD62vjhptMM/edit
-		""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Fun"
+	    "COOLDOWN":
+	    3,
+	    "MAIN":
+	    "Allows you to write short tags and/or programs with a simplified instruction set",
+	    "FORMAT":
+	    "[subcommand]",
+	    "CHANNEL":
+	    0,
+	    "USAGE":
+	    """The full documentation for all B++ functionality is displayed in this document:\x1f\t\t**NOTE: THIS IMPLEMENTATION OF B++ IS OUTDATED AND MAY BE SOON DISABLED.**\x1f\t\thttps://docs.google.com/document/d/1-UOafQ0qW0AzpR1xxCYU_2__VulfofMDeD62vjhptMM/edit\x1f\t\t"""
+	    .replace("\n", "").replace("\t", ""),
+	    "CATEGORY":
+	    "Fun",
 	}
 
 PERMS = 1 # Member
