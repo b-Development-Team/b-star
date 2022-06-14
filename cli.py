@@ -1,5 +1,5 @@
 from src.interpreter.function_deco import setupFunctions
-from src.interpreter.run import runCode
+from src.interpreter.run import run_code
 
 empty = ""
 setupFunctions()
@@ -9,6 +9,6 @@ while True:
     print("enter your b* code:\n")
 
     code = "\n".join(iter(input, empty))
-    result = runCode(code)
+    result = run_code(code)
     print("Result below:\n\n", result, "\n", sep="")
 

@@ -1,4 +1,4 @@
-import lark
+from lark import Lark
 
 bstargrammar = r"""
 start: arg*
@@ -40,3 +40,8 @@ ALPHANUMERIC: ("_" | "." | LETTER | DIGIT)+
 %import common.WS
 %ignore WS
 %ignore C_COMMENT"""
+parser = Lark(bstargrammar)
+
+
+def parse(code):
+    return parser.parse(code)

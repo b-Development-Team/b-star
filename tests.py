@@ -1,6 +1,6 @@
 from src.interpreter.function_deco import setupFunctions
 
-from src.interpreter.run import runCode
+from src.interpreter.run import run_code
 
 
 # stolen from https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
@@ -24,7 +24,7 @@ class Stats:
 
 
 def test(name, code, assumption):
-    result = runCode(code)
+    result = run_code(code)
     correct = result == assumption
     if correct:
         print(Colours.OKGREEN + Colours.BOLD + "✔", name, Colours.ENDC)
