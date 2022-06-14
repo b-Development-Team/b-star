@@ -10,7 +10,6 @@ start: arg*
     | SIGNED_NUMBER -> number
     | function
     | array
-    | C_COMMENT -> comment
     | unescaped_string
 
 string: ESCAPED_STRING
@@ -36,7 +35,8 @@ ALPHANUMERIC: ("_" | "." | LETTER | DIGIT)+
 %import common.WORD
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
-%import common.C_COMMENT
 
+%import common.C_COMMENT
 %import common.WS
-%ignore WS"""
+%ignore WS
+%ignore C_COMMENT"""
