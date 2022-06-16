@@ -6,24 +6,22 @@ start: arg*
 ?arg:
     | "true" -> true
     | "false" -> false
-    | string
-    | SIGNED_NUMBER -> number
+    | ESCAPED_STRING
+    | SIGNED_NUMBER
     | function
     | array
-    | unescaped_string
+    | UNESCAPED
 
 string: ESCAPED_STRING
 
-block: ALPHANUMERIC
+block: UNESCAPED
 args: arg*
 
 array: "{" [arg ("," arg)*] "}"
 
 function: ("[") block args ("]")
 
-unescaped_string: (SUPERALPHANUMERIC | EVERYTHING)
-nonalphanumeric: EVERYTHING
-
+NONFUNCS: ACTUALLYEVERYTHING*
 DIGIT: "0".."9"
 LCASE_LETTER: "a".."z"
 UCASE_LETTER: "A".."Z"
@@ -31,6 +29,10 @@ LETTER: UCASE_LETTER | LCASE_LETTER
 ALPHANUMERIC: ("_" | "." | LETTER | DIGIT)+
 SUPERALPHANUMERIC: (ALPHANUMERIC | "+" | "*" | "-" | "/" | "^" | "=" | "!")+
 EVERYTHING: /.^\s/+
+UNESCAPED: (SUPERALPHANUMERIC | EVERYTHING)
+ACTUALLYEVERYTHING: /\s\S/+
+
+
 
 // imports from common library my beloved
 %import common.WORD
