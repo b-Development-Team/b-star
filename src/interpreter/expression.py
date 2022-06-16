@@ -1,5 +1,6 @@
 import types
 from enum import Enum
+from math import floor
 from re import fullmatch
 from typing import Union, List
 
@@ -69,21 +70,15 @@ def Expression(block: Tree, codebase):
         case "unescaped_string":
             return str(block.children[0])
         case "number":
-            # TODO: check if it's an int or float
-            return float(block.children[0])
+            # TODO: remove this if statement once the parser can handle ints and floats
+            if floor(block.children[0]) == block.children[0]:
+                return int(block.children[0])
+            else:
+                return float(block.children[0])
         case "array":
             return block.children
         case _:
             return block.children[0]
-    # elif blockType == Type.ARRAY:
-    #     arguments = block[1:]
-    #     return list(map(lambda item: Expression(item, codebase), arguments))
-    # elif blockType == Type.INTEGER:
-    #     return int(block)
-    # elif blockType == Type.FLOAT:
-    #     return float(block)
-    # elif blockType == Type.EXPONENT:
-    #     return int(float(block))
 
 
 def findFunction(name: str, codebase):  # -> Union[Callable[[List, Codebase], None], List[str]]:

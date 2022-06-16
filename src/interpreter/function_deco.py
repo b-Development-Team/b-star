@@ -74,7 +74,7 @@ def setupFunctions():
     Function(["concat"], {"items": ArgumentType.Variadic}, concat)
     Function(["define"], {"name": ArgumentType.Required, "item": ArgumentType.Required}, define)
 
-    Function(["find", "indexof"], {"v1": ArgumentType.Required, "v2": ArgumentType.Required, "v3": ArgumentType.Required, "v4": ArgumentType.Required}, find)
+    Function(["find", "indexof"], {"array": ArgumentType.Required, "element": ArgumentType.Required, "start": 0, "stop": 9223372036854775807}, find)
     Function(["func", "function"], {"name": ArgumentType.Required, "args": ArgumentType.Required, "body": ArgumentType.Required}, func, parse_args=False)
     Function(["return", "ret"], {"result": ArgumentType.Required}, return_func)
     Function(["global"], {"use": ArgumentType.Required, "name": ArgumentType.Required, "value": 0}, global_func)

@@ -18,7 +18,7 @@ from src.interpreter.tempFunctionsFile import functions
 
 def runCode(code: str, user: Union[discord.User, None] = None, arguments: List[str] = None):
     try:
-        return func_timeout(30, runCodeReal, args=(code, user, arguments))
+        return func_timeout(30, runCodeSandbox, args=(code, user, arguments))
         # return runCodeReal(code, user, arguments)
     except FunctionTimedOut:
         return returnError("RUNTIME", "Timed out! (More than 30 seconds)")
@@ -26,8 +26,7 @@ def runCode(code: str, user: Union[discord.User, None] = None, arguments: List[s
         return error
 
 
-# TODO: Find a better name for this
-def runCodeReal(code: str, user: Union[discord.User, None] = None, arguments: List[str] = None):
+def runCodeSandbox(code: str, user: Union[discord.User, None] = None, arguments: List[str] = None):
     # TODO: Trim up to three backticks from beginning and end of code
     parsed_code_tree = parseCode(code)
     blocks = parsed_code_tree.children
