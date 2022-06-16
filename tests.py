@@ -37,11 +37,32 @@ def test(name, code, assumption):
 
 
 def testAll():
-    test("J", "[J 2]", "jj")
-    test("J Pt. 2", "[J 0]", "j")
-    test("J Pt. 3", "[J -9]", "j")
-    test("J Final Boss", "[J 100]",
-         "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+    test("Hello, World!", "Hello, World!", "Hello, World!")
+    test("Simple Define", "[DEFINE x 10][VAR x]", "10")
+    test("Define with dynamic name", """
+        [DEFINE rnd [RANDINT 1 10]]
+        [DEFINE [VAR rnd] 10][VAR [VAR rnd]]
+    """, "10")
+    test("Basic Math", """
+        [ADD 1 [SUB 2 [MUL 3 [DIV 4 4]]]]
+    """, "0")
+    test("Basic Legacy Math", """
+        [MATH 1 + [MATH 2 - [MATH 3 * [MATH 4 / 4]]]]
+    """, "0")
+    test("Basic Comparison", """
+        [COMPARE 2 > 3]
+    """, "False")
+    test("Basic Logic", """
+        [IF [COMPARE 2 < 3] "yes" "no"]
+    """, "yes")
+    test("Basic Functions", """
+        [FUNC SQUARE [ARGS "x"]
+            [MUL [VAR x] [VAR x]]
+        ]
+        [SQUARE 5]
+    """, "25")
+
+    test("J", "[J 5]", "jjjjj")
 
 
 if __name__ == "__main__":
@@ -56,4 +77,3 @@ if __name__ == "__main__":
         print(Colours.WARNING + Colours.BOLD + f"{Stats.correctTests} / {Stats.num} passed..." + Colours.ENDC)
     else:
         print(Colours.FAIL + Colours.BOLD + f"{Stats.correctTests} / {Stats.num} passed..." + Colours.ENDC)
-
