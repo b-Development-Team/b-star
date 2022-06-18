@@ -4,7 +4,7 @@ from math import floor
 from re import fullmatch
 from typing import Union, List
 
-from lark import Tree
+from lark import Tree, Token
 
 import src.interpreter.globals as globals
 import src.interpreter.tempFunctionsFile
@@ -46,10 +46,17 @@ class Type(Enum):
 """
 
 
-def Expression(block: Tree, codebase):
+def Expression(block: Union[Tree, Token], codebase):
     if globals.codebase.ret is not None:
         return
-        
+
+    if type(block) is Token:
+        # the worse if statement you've ever seen.
+        # TODO: maybe make this a function?
+        if (block[0] == "'" or block[0] == "\"") and (block[-1] == "'" or block[-1] == "\""):
+            return block[1:-1]
+        return block
+
     # print(block, block.pretty())
     match block.data:
         case "function":
@@ -67,17 +74,15 @@ def Expression(block: Tree, codebase):
                     return functionWanted.run(codebase, arguments, alias)
             else:
                 raise NotImplementedError(f"Function not found: {alias}")
-        case "unescaped_string":
-            return str(block.children[0])
-        case "number":
-            # TODO: remove this if statement once the parser can handle ints and floats
-            if floor(block.children[0]) == block.children[0]:
-                return int(block.children[0])
-            else:
-                return float(block.children[0])
+        case "integer":
+            return int(block.children[0])
+        case "float":
+            return float(block.children[0])
         case "array":
             return block.children
-        case _:
+        case "string":
+            return block.children[0][1:-1]
+        case "unescaped_string" | _:
             return block.children[0]
 
 
