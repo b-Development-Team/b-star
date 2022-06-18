@@ -1,37 +1,40 @@
 from lark import Lark
 
 bstargrammar = r"""
-start: arg*
-
+start: bstar*
+    
+?bstar:
+    | function
+    | ALLBUTBRACKETS
 ?arg:
     | "true" -> true
     | "false" -> false
-    | ESCAPED_STRING
-    | SIGNED_NUMBER
+    | string
+    | SIGNED_NUMBER -> number
     | function
     | array
-    | UNESCAPED
+    | unescaped_string
 
 string: ESCAPED_STRING
 
-block: UNESCAPED
+block: ALPHANUMERIC
 args: arg*
 
 array: "{" [arg ("," arg)*] "}"
 
 function: ("[") block args ("]")
 
-NONFUNCS: ACTUALLYEVERYTHING*
+unescaped_string: ALPHANUMERIC
+ALLBUTBRACKETS: ALLEXCEPTBRACKETS+
+
+
 DIGIT: "0".."9"
 LCASE_LETTER: "a".."z"
 UCASE_LETTER: "A".."Z"
 LETTER: UCASE_LETTER | LCASE_LETTER
-ALPHANUMERIC: ("_" | "." | LETTER | DIGIT)+
-SUPERALPHANUMERIC: (ALPHANUMERIC | "+" | "*" | "-" | "/" | "^" | "=" | "!")+
-EVERYTHING: /.^\s/+
-UNESCAPED: (SUPERALPHANUMERIC | EVERYTHING)
-ACTUALLYEVERYTHING: /\s\S/+
-
+ALPHANUMERIC: (ALLNONCONFLICTING)+
+ALLNONCONFLICTING: /[^\[\]0-9\{\}\"\s]/
+ALLEXCEPTBRACKETS: /[^\[\]]/
 
 
 // imports from common library my beloved
@@ -41,6 +44,7 @@ ACTUALLYEVERYTHING: /\s\S/+
 
 %import common.C_COMMENT
 %import common.WS
+
 %ignore WS
 %ignore C_COMMENT"""
 parser = Lark(bstargrammar)
