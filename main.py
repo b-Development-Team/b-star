@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from bot import bot
 from src.database.s3 import createTag, getTag, infoTag, updateTag, isOwnerProgram, editTag, deleteTag, leaderboards, \
     connectToDatabase
-from src.interpreter.expression import isType, Type
 from src.interpreter.function_deco import setupFunctions
 from src.interpreter.run import runCode
 prod = os.environ.get("IS_HEROKU", False)

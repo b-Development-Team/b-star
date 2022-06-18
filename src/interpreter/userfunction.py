@@ -24,6 +24,7 @@ class UserFunction:
         func_arg_name = self.args.values()
         globals.codebase.variables.append({})
         for i, arg in enumerate(func_arg_name):
+            # TODO: This is outdated
             Expression(["DEFINE", arg, run_args[i]], globals.codebase)
 
         result = Expression(self.block, globals.codebase)
