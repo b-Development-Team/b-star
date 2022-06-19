@@ -15,6 +15,7 @@ from src.interpreter.functions.global_func import global_func
 from src.interpreter.functions.if_func import if_func
 from src.interpreter.functions.import_func import import_func
 from src.interpreter.functions.index import index
+from src.interpreter.functions.setindex import setindex
 from src.interpreter.functions.j import j
 from src.interpreter.functions.join import join
 from src.interpreter.functions.joinall import joinall
@@ -36,6 +37,7 @@ from src.interpreter.functions.var import var
 from src.interpreter.functions.while_func import while_func
 from src.interpreter.functions.block import block
 from src.interpreter.functions.return_func import return_func
+from src.interpreter.functions.raise_func import raise_func
 
 from src.interpreter.functions.math.abs import abs_func
 from src.interpreter.functions.math.add import add
@@ -73,14 +75,15 @@ def setupFunctions():
     Function(["compare"], {"v1": ArgumentType.Required, "operator": ArgumentType.Required, "v2": ArgumentType.Required}, compare)
     Function(["concat"], {"items": ArgumentType.Variadic}, concat)
     Function(["define"], {"name": ArgumentType.Required, "item": ArgumentType.Required}, define)
-
-    Function(["find", "indexof"], {"array": ArgumentType.Required, "element": ArgumentType.Required, "start": 0, "stop": 9223372036854775807}, find)
+    
+    Function(["find", "indexof"], {"array": ArgumentType.Required, "element": ArgumentType.Required}, find)
     Function(["func", "function"], {"name": ArgumentType.Required, "args": ArgumentType.Required, "body": ArgumentType.Required}, func, parse_args=False)
     Function(["return", "ret"], {"result": ArgumentType.Required}, return_func)
     Function(["global"], {"use": ArgumentType.Required, "name": ArgumentType.Required, "value": 0}, global_func)
     Function(["if"], {"compare": ArgumentType.Required, "true": ArgumentType.Required, "false": ArgumentType.Required}, if_func, parse_args=False)
     Function(["index"], {"arr": ArgumentType.Required, "number": ArgumentType.Required}, index)
     Function(["import"], {"name": ArgumentType.Required}, import_func)
+    Function(["setindex"], {"arr": ArgumentType.Required, "index": ArgumentType.Required, "value": ARgumentType.Required}, setindex)
 
     Function(["length"], {"arr": ArgumentType.Required}, length)
     Function(["loop"], {"amount": ArgumentType.Required, "body": ArgumentType.Required}, loop, parse_args=False)
@@ -91,7 +94,9 @@ def setupFunctions():
 
     Function(["randint"], {"minimum": ArgumentType.Required, "maximum": ArgumentType.Required}, randint)
     Function(["random"], {"minimum": 0, "maximum": 1}, random_func)
+
     Function(["repeat"], {"item": ArgumentType.Required, "amount": ArgumentType.Required}, repeat)
+    Function(["raise"], {"message": ArgumentType.Required}, raise_func)
     Function(["round"], {"number": ArgumentType.Required}, round_func)
     Function(["replace"], {"string": ArgumentType.Required, "match": ArgumentType.Required, "replace": ArgumentType.Required}, replace_func)
     Function(["slice"], {"array": ArgumentType.Required, "index_start": ArgumentType.Required, "index_end": ArgumentType.Required}, slice_func)
