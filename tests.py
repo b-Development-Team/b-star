@@ -33,7 +33,7 @@ class Stats:
 def attempt(code, assumption, amount=50):
     attemptResults = []
     failedAttemptOutput = ""
-    for i in range(amount):
+    for _ in range(amount):
         output = runCodeSandbox(code)
         correct = output == assumption
         attemptResults.append(correct)
@@ -86,7 +86,7 @@ def testAll():
 if __name__ == "__main__":
     setupFunctions()
     # disableUselessPrints()
-    print(Colours.WARNING + "Starting test..." + Colours.ENDC)
+    print(f"{Colours.WARNING}Starting test...{Colours.ENDC}")
     testAll()
 
     print(Colours.ENDC + "\n\n==== TEST RESULTS ====")
