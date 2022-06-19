@@ -96,16 +96,12 @@ def findFunction(name: str, codebase):  # -> Union[Callable[[List, Codebase], No
 
 def isType(block):
     if type(block) == list:
-        if block[0] == "ARRAY":
-            return Type.ARRAY
-        else:
-            return Type.FUNCTION
+        return Type.ARRAY if block[0] == "ARRAY" else Type.FUNCTION
+    if fullmatch(r"^[+-]?\d+$", str(block)):
+        return Type.INTEGER
+    elif fullmatch(r"^[+-]?\d+(.|([eE][+-]?)|)\d+$", str(block)):
+        return Type.FLOAT
+    # elif fullmatch(r"^[+-]?\d+[eE][+-]?\d+$", block):
+    #     return Type.EXPONENT
     else:
-        if fullmatch(r"^[+-]?\d+$", str(block)):
-            return Type.INTEGER
-        elif fullmatch(r"^[+-]?\d+(.|([eE][+-]?)|)\d+$", str(block)):
-            return Type.FLOAT
-        # elif fullmatch(r"^[+-]?\d+[eE][+-]?\d+$", block):
-        #     return Type.EXPONENT
-        else:
-            return Type.STRING
+        return Type.STRING

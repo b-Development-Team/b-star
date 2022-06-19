@@ -9,7 +9,7 @@ from src.interpreter.globals import debug
 
 # Returns true if the value is not "None" or "Infinite"
 def isUniqueValue(value: Any):
-    return False if value is (None or math.inf) else True
+    return value is not ((None or math.inf))
 
 
 class Function:
