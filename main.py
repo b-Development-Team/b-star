@@ -30,20 +30,19 @@ async def on_ready():
 
 
 async def accept_file_or_message(ctx, message):
-    if len(ctx.message.attachments) > 0:
-        attachment = ctx.message.attachments[0]
-        try:
-            await attachment.save(f"Config/{ctx.message.id}.txt")
-        except Exception:
-            raise "Include a program to save!"
-        file = open(f"Config/{ctx.message.id}.txt", "r", encoding="utf-8").read()
-        os.remove(f"Config/{ctx.message.id}.txt")
-        if attachment.size >= 150_000:
-            raise "File is too large! (150KB MAX)"
-        else:
-            return file
-    else:
+    if len(ctx.message.attachments) <= 0:
         return message
+    attachment = ctx.message.attachments[0]
+    try:
+        await attachment.save(f"Config/{ctx.message.id}.txt")
+    except Exception:
+        raise "Include a program to save!"
+    file = open(f"Config/{ctx.message.id}.txt", "r", encoding="utf-8").read()
+    os.remove(f"Config/{ctx.message.id}.txt")
+    if attachment.size >= 150_000:
+        raise "File is too large! (150KB MAX)"
+    else:
+        return file
 
 
 @bot.command()
@@ -128,14 +127,14 @@ async def delete(ctx, name):
 @bot.command()
 async def ping(ctx):
     """Pings the bot"""
-    await ctx.send("pong! " + str(round(bot.latency * 1000, 2)) + "ms")
+    await ctx.send(f"pong! {str(round(bot.latency * 1000, 2))}ms")
 
 
 @bot.command()
 async def uptime(ctx):
     """Responds with uptime."""
     uptime = str(datetime.timedelta(seconds=int(round(time.time() - startTime))))
-    await ctx.send("Uptime: " + uptime)
+    await ctx.send(f"Uptime: {uptime}")
 
 if prod:
     bot.run(os.environ.get("TOKEN", None))
