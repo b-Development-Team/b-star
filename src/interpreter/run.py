@@ -21,9 +21,9 @@ def runCode(code: Tree, user: Union[discord.User, None] = None, arguments: List[
     try:
         return func_timeout(30, runCodeSandbox, args=(code, user, arguments))
     except FunctionTimedOut:
-        return returnError("RUNTIME", "Timed out! (More than 30 seconds)")
+        return {"main": returnError("RUNTIME", "Timed out! (More than 30 seconds)")}
     except Exception as error:
-        return error
+        return {"main": error}
 
 
 def runCodeSandbox(code: Tree, user: Union[discord.User, None] = None, arguments: List[str] = []):
@@ -40,11 +40,22 @@ def runCodeSandbox(code: Tree, user: Union[discord.User, None] = None, arguments
 
     # print(codebase.variables)
     # print(codebase.output)
+    if len(globals.codebase.pmoutput) < 2001 and len(globals.codebase.pmoutput) != 0 and not globals.codebase.pmoutput.isspace() and globals.codebase.sendpm is True:
+        globals.codebase.giveToBot['pm'] = globals.codebase.pmoutput
+    elif globals.codebase.sendpm is False:
+        pass
+    else:
+        globals.codebase.output += f"\n\n⚠️: The code has ran successfully, but a PM failed to send due to it being empty or too long! ({len(globals.codebase.pmoutput)} chars)"
+
     if len(globals.codebase.output) == 0 or globals.codebase.output.isspace():
-        return "⚠️: The code has ran successfully, but returned nothing!"
+        return {"main": "⚠️: The code has ran successfully, but returned nothing!"}
+        
     if len(globals.codebase.output) > 2000:
-        return f"⚠️: Output too long, only showing the first 1000 characters:\n\n```{globals.codebase.output[:1000]}```"
-    return globals.codebase.output
+        return {"main": f"⚠️: Output too long, only showing the first 1000 characters:\n\n```{globals.codebase.output[:1000]}```"}
+    
+    globals.codebase.giveToBot['main'] = globals.codebase.output
+    print(globals.codebase.giveToBot)
+    return globals.codebase.giveToBot
 
 
 def readLine(statement):
@@ -68,3 +79,14 @@ def returnError(statement, error, i):
     if globals.debug.print_error:
         print(f"{errmsg}\n\n{format_exc()}")  # print stack trace too
     return errmsg
+
+
+async def postrun(output, ctx):
+    await ctx.send(output['main'])
+    if globals.codebase.sendpm and globals.codebase.pmoutput > 0:
+        try:
+            await ctx.message.author.send(output['pm'])
+        except:
+            await ctx.author.create_dm()
+            await ctx.message.author.send(output['pm'])
+

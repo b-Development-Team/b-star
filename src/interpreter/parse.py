@@ -9,6 +9,7 @@ start: bstar*
 ?arg:
     | ("true" | "True") -> true
     | ("false" | "False") -> false
+    | unescaped_string
     | string
     | integer
     | float
@@ -26,9 +27,7 @@ COMMENT: ("[# ") ALLBUTBRACKETS ("]")
 unescaped_string.-3: ALPHANUMERIC
 ALLBUTBRACKETS: ALLEXCEPTBRACKETS+
 DIGIT: "0".."9"
-LCASE_LETTER: "a".."z"
-UCASE_LETTER: "A".."Z"
-LETTER: UCASE_LETTER | LCASE_LETTER
+INT: DIGIT+
 ALPHANUMERIC: (ALLNONCONFLICTING)+
 ALLNONCONFLICTINGWITHNEWLINES: /([^\[\]\{\}\"\s\,\-]|[\n\-])/
 ALLNONCONFLICTING: /([^\[\]\{\}\"\s\,\-]|[\-])/

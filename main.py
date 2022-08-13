@@ -11,7 +11,7 @@ from bot import bot
 from src.database.s3 import createTag, getTag, infoTag, updateTag, isOwnerProgram, editTag, deleteTag, leaderboards, \
     connectToDatabase
 from src.interpreter.function_deco import setupFunctions
-from src.interpreter.run import runCode
+from src.interpreter.run import runCode, postrun
 prod = os.environ.get("IS_HEROKU", False)
 
 load_dotenv()
@@ -22,7 +22,7 @@ setupFunctions()
 async def on_ready():
     connectToDatabase()
     print('Logged in as')
-    print(bot.user.name)
+    print(bot.user.name) 
     print(bot.user.id)
     print('------')
     global startTime  # global variable to be used later for uptime
@@ -66,7 +66,7 @@ async def tag(ctx, message, *, arguments=""):
         argument_list = arguments.split(" ")
 
         output = runCode(code, ctx.author, argument_list)
-        await ctx.send(output)
+        await postrun(output, ctx)
 
         # If all goes well, then increment the use
         updateTag(message)
