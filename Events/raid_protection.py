@@ -44,9 +44,9 @@ class EVENT:
 		# Make sure there's an entry for the non-member on the dict
 		if message.author.id not in self.param["INFO"].keys():
 			self.param["INFO"][message.author.id] = [[], []]
-		
+
 		self.param["INFO"][message.author.id][0].append(time.time())
-	
+
 		# Get total number of people pinged -- including in role pings
 		mentioned = message.raw_mentions
 		role_mentioned = []
@@ -69,7 +69,7 @@ class EVENT:
 			cause = "sending messages too quickly"
 		if ping >= self.param["PING_LIMIT"]:
 			cause = "pinging too many people"
-		
+
 		if cause != "": # Mute the member
 			try:
 				if self.MUTED not in self.SERVER["MAIN"].get_member(message.author.id).roles:
@@ -108,10 +108,10 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return

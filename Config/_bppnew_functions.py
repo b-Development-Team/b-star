@@ -39,9 +39,7 @@ def INDEXOF(a,b,c=None,d=None):
 	if type(a) != str and not isinstance(a,list):
 		raise TypeError(f"First parameter of INDEXOF function must be an array or string: {safe_cut(a)}")
 	if c is not None:
-		if d is not None:
-			return a.index(b,c,d)
-		return a.index(b,c)
+		return a.index(b,c,d) if d is not None else a.index(b,c)
 	return a.index(b)
 
 def TIMEFUNC(): return time.time()
@@ -90,21 +88,20 @@ def ARRAY(*a):
 
 def CONCAT(*a):
 	all_type = None
-	
+
 	for a1 in a:
 		if type(a1) in [int, float]: a1 = str(a1)
 		if all_type is None: all_type = type(a1)
 		elif type(a1) != all_type:
 			raise TypeError("CONCAT parameters must either be all arrays or all strings")
-	
+
 	if all_type == str:
 		a = [str(a1) for a1 in a]
 		return ''.join(a)
-	if all_type == list:
-		a = list(itertools.chain(*a))
-		return a
-	else:
+	if all_type != list:
 		raise IndexError("Cannot call CONCAT function with no arguments")
+	a = list(itertools.chain(*a))
+	return a
 
 def LENGTH(a):
 	if type(a) in [int, float]: a = str(a)
@@ -113,11 +110,8 @@ def LENGTH(a):
 def ARGS(a=None):
 	if not is_whole(a) and a is not None:
 		raise ValueError(f"ARGS function index must be an integer: {safe_cut(a)}")
-	
-	if a is None:
-		return ("aa", )
-	
-	return ("a", int(a))
+
+	return ("aa", ) if a is None else ("a", int(a))
 
 def GLOBALDEFINE(a, b):
 	if type(a) != str:
@@ -126,7 +120,7 @@ def GLOBALDEFINE(a, b):
 	if re.search(r"[^A-Za-z_0-9]", a) or re.search(r"[0-9]", a[0]):
 		raise NameError(
 		f"Global variable name must be only letters, underscores and numbers, and cannot start with a number: {safe_cut(a)}")
-	
+
 	return ("gd", b)
 
 def GLOBALVAR(a):
@@ -136,7 +130,7 @@ def GLOBALVAR(a):
 	if re.search(r"[^A-Za-z_0-9]", a) or re.search(r"[0-9]", a[0]):
 		raise NameError(
 		f"Global variable name must be only letters, underscores and numbers, and cannot start with a number: {safe_cut(a)}")
-	
+
 	return ("gv", a)
 
 def DEFINE(a, b):
@@ -146,7 +140,7 @@ def DEFINE(a, b):
 	if re.search(r"[^A-Za-z_0-9]", a) or re.search(r"[0-9]", a[0]):
 		raise NameError(
 		f"Variable name must be only letters, underscores and numbers, and cannot start with a number: {safe_cut(a)}")
-	
+
 	return ("d", b)
 
 def VAR(a):
@@ -156,7 +150,7 @@ def VAR(a):
 	if re.search(r"[^A-Za-z_0-9]", a) or re.search(r"[0-9]", a[0]):
 		raise NameError(
 		f"Variable name must be only letters, underscores and numbers, and cannot start with a number: {safe_cut(a)}")
-	
+
 	return ("v", a)
 
 def REPEAT(a, b):
@@ -186,10 +180,7 @@ def CHOOSECHAR(a):
 def IF(a, b, c=""):
 	a = a not in [0, "0"]
 
-	if a:
-		return b
-	else:
-		return c
+	return b if a else c
 
 def COMPARE(a, b, c):
 	operations = [">", "<", ">=", "<=", "!=", "=", "=="]
@@ -200,14 +191,14 @@ def COMPARE(a, b, c):
 	if is_number(c): c = float(c)
 
 	if operations.index(b) <= 3 and type(a) != type(c):
-		raise TypeError(f"Entries to compare in COMPARE function are not the same type")
+		raise TypeError("Entries to compare in COMPARE function are not the same type")
 
 	if b == ">": return int(a > c)
 	if b == "<": return int(a < c)
 	if b == ">=": return int(a >= c)
 	if b == "<=": return int(a <= c)
 	if b == "!=": return int(a != c)
-	if b == "=" or b == "==": return int(a == c)
+	if b in ["=", "=="]: return int(a == c)
 
 def MOD(a, b):
 	if not is_number(a):
@@ -218,7 +209,8 @@ def MOD(a, b):
 	a = int(a) if is_whole(a) else float(a)
 	b = int(b) if is_whole(b) else float(b)
 
-	if b == 0: raise ZeroDivisionError(f"Second parameter of MOD function cannot be zero")
+	if b == 0:
+		raise ZeroDivisionError("Second parameter of MOD function cannot be zero")
 
 	return a % b
 
@@ -245,14 +237,22 @@ def MATHFUNC(a, b, c):
 		return a*c
 
 	if b == "/":
-		if c == 0: raise ZeroDivisionError(f"Second parameter of MATH function in division cannot be zero")
+		if c == 0:
+			raise ZeroDivisionError(
+				"Second parameter of MATH function in division cannot be zero"
+			)
+
 		return a/c
-	
+
 	if b == "%":
-		if c == 0: raise ZeroDivisionError(f"Second parameter of MATH function in modulo cannot be zero")
+		if c == 0:
+			raise ZeroDivisionError(
+				"Second parameter of MATH function in modulo cannot be zero"
+			)
+
 		return a%c
-	
-	
+
+
 	if b == "^":
 		try:
 			return math.pow(a, c)
@@ -288,29 +288,27 @@ def THROW(a): # don't need to check, because either way it'll error
 	
 def TYPEFUNC(a):
 	if is_whole(a): return "int"
-	if is_number(a): return "float"
-	return type(a).__name__
+	return "float" if is_number(a) else type(a).__name__
 	
 def ROUND(a, b=0):
 	if not is_number(a):
 		raise ValueError(f"ROUND function parameter is not a number: {safe_cut(a)}")
 	if not is_whole(b):
 		raise ValueError(f"ROUND function parameter is not an integer: {safe_cut(b)}")
-	
+
 	rounded = round(float(a), int(b))
-	if rounded.is_integer(): return int(rounded)
-	return rounded
+	return int(rounded) if rounded.is_integer() else rounded
 
 def FLOOR(a):
 	if not is_number(a):
 		raise ValueError(f"FLOOR function parameter is not a number: {safe_cut(a)}")
-	
+
 	return math.floor(float(a))
 
 def CEIL(a):
 	if not is_number(a):
 		raise ValueError(f"CEIL function parameter is not a number: {safe_cut(a)}")
-	
+
 	return math.ceil(float(a))
 
 def LOG(a, b):
@@ -318,9 +316,9 @@ def LOG(a, b):
 		raise ValueError(f"LOG function parameter is not a number: {safe_cut(a)}")
 	if not is_number(b):
 		raise ValueError(f"LOG function parameter is not a number: {safe_cut(b)}")
-		
+
 	if b == 0: raise ValueError("Second parameter of LOG function must not be zero")
-		
+
 	return math.log(float(a),float(b))
 
 def FACTORIAL(a):
@@ -335,66 +333,66 @@ def FACTORIAL(a):
 def SIN(a):
 	if not is_number(a):
 		raise ValueError(f"SIN function parameter is not a number: {safe_cut(a)}")
-	
+
 	return math.sin(float(a))
 
 def TAN(a):
 	if not is_number(a):
 		raise ValueError(f"TAN function parameter is not a number: {safe_cut(a)}")
-	
+
 	return math.tan(float(a))
 
 def COS(a):
 	if not is_number(a):
 		raise ValueError(f"COS function parameter is not a number: {safe_cut(a)}")
-	
+
 	return math.cos(float(a))
 
 def MINFUNC(a):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"MIN function parameter is not a list: {safe_cut(a)}")
-	
+
 	if 0 not in [is_number(elem) for elem in a]:
 		a = [float(elem) for elem in a]
-	
+
 	return min(a)
 
 def MAXFUNC(a):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"MAX function parameter is not a list: {safe_cut(a)}")
-	
+
 	if 0 not in [is_number(elem) for elem in a]:
 		a = [float(elem) for elem in a]
-	
+
 	return max(a)
 
 def SHUFFLE(a):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"SHUFFLE function parameter is not a list: {safe_cut(a)}")
-		
+
 	return random.sample(a, k=len(a))
 
 def SORTFUNC(a):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"SORT function parameter is not a list: {safe_cut(a)}")
-	
+
 	if 0 not in [is_number(elem) for elem in a]:
 		a = [float(elem) for elem in a]
-	
+
 	return sorted(a)
 
 def JOIN(a, b=""):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"First JOIN function parameter is not a list: {safe_cut(a)}")
-	if not type(b) == str:
+	if type(b) != str:
 		raise ValueError(f"Second JOIN function parameter is not a string: {safe_cut(b)}")
-	
+
 	a = [str(elem) for elem in a]
-	
+
 	return b.join(a)
 	
 def SETINDEX(a, b, c):
-	if not type(a) == list:
+	if type(a) != list:
 		raise ValueError(f"SETINDEX function parameter is not a list: {safe_cut(a)}")
 	if not is_whole(b):
 		raise ValueError(f"SETINDEX function parameter is not an integer: {safe_cut(b)}")

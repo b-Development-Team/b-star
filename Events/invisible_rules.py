@@ -59,7 +59,7 @@ class EVENT:
 	def __init__(self):
 		self.RUNNING = False
 		self.GAME_STARTED = False
-		
+
 		self.GAME = DEFAULT_GAME()
 
 		self.PLAYER_ROLE = None
@@ -83,7 +83,7 @@ class EVENT:
 	def end(self):
 		self.RUNNING = False
 		self.GAME_STARTED = False
-		
+
 		self.GAME = DEFAULT_GAME()
 
 		self.PLAYER_ROLE = None
@@ -103,7 +103,7 @@ class EVENT:
 			emoji = ["🟧"] # Orange square
 		else:
 			emoji = ["🟥"] # Red square
-		
+
 		timer_bar = ["➡️"] + emoji * p + ["⬛"] * (8 - p)  + ["⬅️"]
 
 		timer_bar = " ".join(timer_bar)
@@ -112,11 +112,8 @@ class EVENT:
 			msg = f"{'⌛' if p % 2 == 0 else '⏳'} **The round ends <t:{self.GAME['NEXT_PERIOD']}:R>!**"
 		else:
 			msg = "⌛ **The round has ended!**"
-		
-		if just_timestamp:
-			return msg
 
-		return msg + "\n\n" + timer_bar
+		return msg if just_timestamp else msg + "\n\n" + timer_bar
 	
 	# Currently not fully implemented
 	def generate_test_msg(self, uid, rule):
