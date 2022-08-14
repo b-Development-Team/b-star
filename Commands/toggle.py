@@ -25,7 +25,10 @@ async def MAIN(message, args, level, perms, SERVER):
 	# Detect whether you should switch the on/off channels around, or turn them all on or them all off
 	# Note: Discord channel permissions are separated into check mark (True), slash (None), and X (False)
 	mode = None
-	if args[1].lower() in ["on", "off"]:
+	if args[1].lower() == "on":
+		mode = args[1].lower() == "on" # True if "on", False if "off"
+		channels = args[2:]
+	elif args[1].lower() == "off":
 		mode = args[1].lower() == "on" # True if "on", False if "off"
 		channels = args[2:]
 	else: # If there isn't a keyword, that means the list of channels begins one argument sooner
@@ -41,10 +44,6 @@ async def MAIN(message, args, level, perms, SERVER):
 				if (discord.utils.get(SERVER["MAIN"].channels, id=int(ch[2:-1])) is None
 				or int(ch[2:-1]) not in SERVER["PUBLIC_CHANNELS"]): # If it's invalid or not a public channel, point so out
 					add = f"The channel with ID {ch[2:-1]} is either invalid or not a public channel. No action will be taken.\n"
-					if len(lines[-1] + add) > 1950:
-						lines.append("")
-					lines[-1] += add
-
 				else: # Otherwise, it's valid, so add it
 					target_c = discord.utils.get(SERVER["MAIN"].channels, id=int(ch[2:-1]))
 					c_perm = target_c.overwrites_for(SERVER["MAIN"].default_role).send_messages
@@ -64,18 +63,15 @@ async def MAIN(message, args, level, perms, SERVER):
 						else: # Channels that are already turned on need no action.
 							add = f"{target_c.mention} is already on. No action will be taken.\n"
 
-					else: # If the user wants all channels to be turned off...
-						if c_perm in [None, True]: # Channels that are turned on...
-							add = f"The channel {target_c.mention} will be toggled **off.**\n"
-							actions.append([target_c, False]) # are turned off.
-						else: # Channels that are already turned off need no action.
-							add = f"{target_c.mention} is already off. No action will be taken.\n"
+					elif c_perm in [None, True]: # Channels that are turned on...
+						add = f"The channel {target_c.mention} will be toggled **off.**\n"
+						actions.append([target_c, False]) # are turned off.
+					else: # Channels that are already turned off need no action.
+						add = f"{target_c.mention} is already off. No action will be taken.\n"
 
-					# This detects if the message is about to reach the character limit, and splits it up into another
-					# message if so (this also appears above and is explained in other both mmt and database comments)
-					if len(lines[-1] + add) > 1950:
-						lines.append("")
-					lines[-1] += add
+				if len(lines[-1] + add) > 1950:
+					lines.append("")
+				lines[-1] += add
 
 			except Exception: # If something goes wrong, assume the channel is invalid
 				add = f"The channel with ID {ch[2:-1]} is invalid. No action will be taken.\n"
@@ -83,7 +79,7 @@ async def MAIN(message, args, level, perms, SERVER):
 					lines.append("")
 				lines[-1] += add
 
-	if len(actions) == 0: # If no actual changes are to be made, nothing will happen
+	if not actions: # If no actual changes are to be made, nothing will happen
 		await message.channel.send("There's no action to be taken. The toggle command has been cancelled.")
 		return
 

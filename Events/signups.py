@@ -44,23 +44,23 @@ class EVENT:
 					self.MESSAGES[msgs.index(msg.id) - 1] = msg
 				else:
 					self.ANNOUNCE = msg
-			
+
 		self.CHANNEL = discord.utils.get(self.SERVER["MAIN"].channels, name=SIGNUPS_CHANNEL)
 		self.ANNOUNCE = await self.CHANNEL.fetch_message(UPDATES_MSG_ID)
-		
+
 		twow_list = self.db.get_entries("signuptwows")
 		twow_list = sorted(twow_list, key=lambda m: self.param["TIME_ORDER"] * m[4])
 
 		for ind, twow in enumerate(twow_list):
 			if twow[4] <= time.time():
 				twow_list[ind] = ""
-		
+
 		twow_list = [x for x in twow_list if x != ""]
 
 		self.db.remove_entry("signuptwows")
 		for twow in twow_list:
 			self.db.add_entry("signuptwows", list(twow))
-		
+
 		if announce:
 			try:
 				new_twow_names = list(zip(*twow_list))[0]
@@ -75,12 +75,15 @@ class EVENT:
 			just_added = [x for x in new_twow_names if x not in old_twow_names]
 			just_removed = [x for x in old_twow_names if x not in new_twow_names]
 
-			new_announcement_list = []
-			for x in just_added:
-				new_announcement_list.append(f"`(<1 hour ago)` : Added **{x}** to the signup list")
-			for x in just_removed:
-				new_announcement_list.append(f"`(<1 hour ago)` : Removed **{x}** from the signup list")
-			
+			new_announcement_list = [
+				f"`(<1 hour ago)` : Added **{x}** to the signup list" for x in just_added
+			]
+
+			new_announcement_list.extend(
+				f"`(<1 hour ago)` : Removed **{x}** from the signup list"
+				for x in just_removed
+			)
+
 			if self.ANNOUNCE.content != "\u200b":
 
 				old_announcement_list = self.ANNOUNCE.content.split("\n")[2:]
@@ -101,19 +104,17 @@ class EVENT:
 							old_announcement_list[z] = " : ".join(halves)
 						else:
 							old_announcement_list[z] = ""
-				
+
 				old_announcement_list = [x for x in old_announcement_list if x != ""]
 
 				if new_announcement_list != []:
 					old_announcement_list += new_announcement_list
 
 				announce_msg = f"__**Recent list changes:**__\n\n" + "\n".join(old_announcement_list)
-				await self.ANNOUNCE.edit(content=announce_msg)
-			
 			else:
 				announce_msg = f"__**Recent list changes:**__\n\n" + "\n".join(new_announcement_list)
-				await self.ANNOUNCE.edit(content=announce_msg)
-			
+			await self.ANNOUNCE.edit(content=announce_msg)
+
 			for x in just_added:
 				verif = twow_list[new_twow_names.index(x)][-1]
 				if verif == 1:
@@ -122,7 +123,7 @@ class EVENT:
 				else:
 					msg = await self.CHANNEL.send("<@&723946317839073370>")
 					print("Pinging for TWOW!")
-				
+
 				await msg.delete()
 
 		formatted_list = []
@@ -142,7 +143,7 @@ class EVENT:
 				hr = int(abs_delta[0] % 24)
 				dy = int(abs_delta[1])
 
-				t_l_string = f"Less than"
+				t_l_string = "Less than"
 				if dy != 0:
 					t_l_string += f" {dy} day{'s' if dy!=1 else ''}"
 				else:
@@ -150,12 +151,12 @@ class EVENT:
 				if hr != 0:
 					if dy != 0:
 						t_l_string += ","
-					
+
 					t_l_string += f" {hr} hour{'s' if hr!=1 else ''}"
-			
+
 			datetime_dl = datetime.datetime.utcfromtimestamp(twow[4])
 			deadline_string = datetime_dl.strftime("%B %d %Y %H:%M UTC")
-			
+
 			try:
 				chosen_emoji = time_emoji[datetime_dl.hour % 12]
 			except Exception:
@@ -164,9 +165,9 @@ class EVENT:
 			verified_string = ""
 			if twow[5] > 0:
 				verified_string = "\n⭐  **FEATURED TWOW!** (<@&488451010319220766>)"
-			
+
 			descrip = twow[3].replace('\n', '\n> ')
-			
+
 			message = f"""\u200b
 			\u200b{verified_string}
 			📖  **__{twow[0]}__** - Hosted by **{twow[1]}**
@@ -176,7 +177,7 @@ class EVENT:
 			📥  **Server Link** : {twow[2]}""".replace("\t", "")
 
 			formatted_list.append(message)
-		
+
 		for t in range(len(self.MESSAGES)):
 			if t < len(formatted_list):
 				await self.MESSAGES[-t-1].edit(content=formatted_list[t])
@@ -198,10 +199,10 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return

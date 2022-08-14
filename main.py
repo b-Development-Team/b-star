@@ -28,7 +28,7 @@ async def event_task(): # This is an event handler for the time-based functions 
 			if datetime.utcnow().hour != PARAMS["HOUR"]:
 				hour_function = True
 				PARAMS["HOUR"] = datetime.utcnow().hour
-			
+
 			for server in SERVERS:
 				for event in SERVERS[server]["EVENTS"].keys():
 					if not SERVERS[server]["EVENTS"][event].RUNNING:
@@ -42,18 +42,18 @@ async def event_task(): # This is an event handler for the time-based functions 
 
 					if two_sec_func is not None:
 						status = await two_sec_func()
-						
+
 						if status is False: # "return False"
 							SERVERS[server]["EVENTS"][event].end()
 							continue
-					
+
 					# If the hour just changed, run the hour function
 					if hour_function:
 						try:
 							SERVERS[server]["EVENTS"][event].on_one_hour
 						except AttributeError:
 							continue
-						
+
 						try:
 							print(f"Running {server} {event} one-hour function")
 							await SERVERS[server]["EVENTS"][event].on_one_hour()
@@ -62,15 +62,13 @@ async def event_task(): # This is an event handler for the time-based functions 
 							print(f"Error in {server} {event} one-hour function: {e}")
 							traceback.print_exc()
 							print("-----------------------------------------------------------\n")
-			
+
 			if len(SERVERS.keys()) != 0 and not PARAMS["EVENT_TASK"]:
 				PARAMS["EVENT_TASK"] = True
 				print("Event handler successfully loaded!")
 
 		except NameError:
 			traceback.print_exc()
-			pass
-
 		# This results in more accurate intervals than using asyncio.sleep(2)
 		await asyncio.sleep(loop_start + 2 - time.time())
 
@@ -95,7 +93,7 @@ async def on_ready():
 	PARAMS["LOGIN"] = time.time()
 	PARAMS["LOGIN_TIME"] = datetime.utcnow()
 	PARAMS["BRAIN"] = BRAIN
-	
+
 	PARAMS["HOUR"] = CURRENT_HOUR
 
 	PARAMS["MAIN_SERVER"] = MAIN_SERVER
@@ -118,7 +116,7 @@ async def on_ready():
 	for server in SERVERS:
 		server_name_list.append(SERVERS[server]["MAIN"].name)
 		SERVERS[server]["EVENTS"] = copy.deepcopy(EVENTS)
-	
+
 	print(f"Servers tallied! Operational servers:\n\t{', '.join(server_name_list)}\n")
 
 	# By default, restart command restarts the script with extra sys arguments
@@ -128,14 +126,14 @@ async def on_ready():
 			server_id = sys.argv[1]
 			id_to_send = int(sys.argv[2])
 			restart_time = float(sys.argv[3])
-			
+
 			channel_to_send = discord.utils.get(SERVERS[server_id]["MAIN"].channels, id=id_to_send)
 			await channel_to_send.send(
 			f"Successfully restarted in {round(time.time() - restart_time, 2)} second(s)!")
 
 		except Exception:
 			pass
-	
+
 	# Start all events that have been marked for starting by default right as the bot starts
 	with open('Config/default.txt', 'r') as file:
 		events = file.read().splitlines()
@@ -147,13 +145,11 @@ async def on_ready():
 
 			except Exception as e:
 				print(f"Error starting {event_name} in {event_server}:", e)
-				pass
-
 	# Notify that the bot is ready
 	print(f"\nLogged in at {PARAMS['LOGIN_TIME']} ({PARAMS['LOGIN']})\n")
 
 	await MAIN_SERVER["LOGS"].send(f"> Logged in at {PARAMS['LOGIN_TIME']} ({PARAMS['LOGIN']})")
-	
+
 	@BRAIN.event
 	async def on_member_join(member):
 		if "twitter.com/h0nde" in member.name.lower():
@@ -161,17 +157,17 @@ async def on_ready():
 				await member.ban(reason="Raid protection measure")
 			except discord.Forbidden:
 				pass
-	
+
 	@BRAIN.event
 	async def on_message(message):
-		
+
 		# Ignore bot messages
 		if message.author == BRAIN.user: return
-		
+
 		try:
 			if message.guild is not None:
 				msg_guild = SERVERS[str(message.guild.id)]
-				
+
 				# Run event on_message on every message
 				for event in msg_guild["EVENTS"].keys():
 					if not msg_guild["EVENTS"][event].RUNNING:
@@ -202,13 +198,13 @@ async def on_ready():
 								continue
 
 							await on_msg_func(message)
-			
+
 			# Not bother with non-commands from here on
 			msg_guild = None
 			for server in SERVERS:
 				if not message.content.startswith(SERVERS[server]["PREFIX"]):
 					continue
-				
+
 				if message.guild is None:
 					msg_guild = SERVERS[server]
 					break
@@ -216,7 +212,7 @@ async def on_ready():
 				elif message.guild.id == int(server):
 					msg_guild = SERVERS[server]
 					break
-			
+
 			if msg_guild is None: return
 
 			msg_PREFIX = msg_guild["PREFIX"]
@@ -233,11 +229,11 @@ async def on_ready():
 
 			if perms < 2 and (message.guild is not None and message.channel not in msg_guild["BOT_CHANNELS"]):
 				return # Ignore commands from non-staff that are not in bot channels'
-			
+
 			if message.author.id == 382925349144494080:
 				await message.channel.send("Nice one, Bazboomer.")
 				return
-			
+
 			if message.author.id == 155149108183695360:
 				await message.channel.send("Act your age, Dynosaur.")
 				return
@@ -255,7 +251,7 @@ async def on_ready():
 
 			# Check if command is either "respond" or "edit" and if so stop
 			# This is for the RESPONDING event
-			if command == "RESPOND" or command == "EDIT": return
+			if command in ["RESPOND", "EDIT"]: return
 
 			# If the command is not found, it checks if it's just an alias of any actual command
 			if command not in PARAMS["COMMANDS"].keys():
@@ -281,18 +277,18 @@ async def on_ready():
 					return
 				else:
 					del COOLDOWN[message.author.id][command]
-					if len(list(COOLDOWN[message.author.id].keys())) == 0:
+					if not list(COOLDOWN[message.author.id].keys()):
 						del COOLDOWN[message.author.id]
 			except KeyError:
 				pass
-			
+
 			cooldown_time = PARAMS["COMMANDS"][command]["HELP"](msg_guild['PREFIX'])["COOLDOWN"]
 			try:
 				COOLDOWN[message.author.id][command] = time.time() + cooldown_time
 			except KeyError:
 				COOLDOWN[message.author.id] = {}
 				COOLDOWN[message.author.id][command] = time.time() + cooldown_time
-			
+
 			# List all the required parameters for the command's function. These are specified in each command's script
 			requisites = [PARAMS[name] for name in PARAMS["COMMANDS"][command]["REQ"]]
 
@@ -309,7 +305,7 @@ async def on_ready():
 						r_guild = str(message.guild.id)
 					else:
 						r_guild = str(message.author.id)
-					
+
 					os.execl(
 						sys.executable, 'python', __file__, r_guild, str(message.channel.id), str(time.time()), *extra_args)
 
@@ -318,10 +314,10 @@ async def on_ready():
 						msg_guild["EVENTS"][state[1]].end()
 					else:
 						msg_guild["EVENTS"][state[1]].start(msg_guild)
-				
+
 				if state[0] == 2: # The mmt command returns a [2] flag, triggering all updates to the event class
 					msg_guild["EVENTS"][state[1]] = state[2]
-				
+
 				if state[0] == 3: # The reimport command returns a [3] flag, signaling to reimport commands
 					global_vars = {}
 					exec(open("Commands/_commands.py").read(), global_vars)
@@ -331,20 +327,20 @@ async def on_ready():
 						cvars = {}
 						exec(open(f"Commands/{cfile}.py", encoding='utf-8').read(), cvars)
 						PARAMS["COMMANDS"][cfile.upper()]["MAIN"] = cvars["MAIN"]
-					
+
 					await message.channel.send(
 						f"Reimported command files in {round(time.time() - state[1], 2)} seconds.")
-				
+
 				if state[0] == 4: # The uno command returns a [4] flag, editing a PARAMS entry
 					PARAMS[state[1]] = state[2]
-			
+
 			try:
 				if COOLDOWN[message.author.id][command] - time.time() > 0:
 					await asyncio.sleep(COOLDOWN[message.author.id][command] - time.time())
 					del COOLDOWN[message.author.id][command]
 			except KeyError:
 				pass
-			
+
 			return
 
 		except Exception: # Detect errors when commands are used
