@@ -134,7 +134,7 @@ class Twowsignups(cmd.Cog):
 		except:
 			pass
 
-		if deadline_timestamp == None:
+		if deadline_timestamp is None:
 
 			await self.edit_modal(ctx, msg, user, "💀 **Your deadline is formatted wrong! Use the `DD/MM/YYYY HH:MM` format.**",
 				name_txt, host_txt, deadline_txt, desc_txt, invite_txt)

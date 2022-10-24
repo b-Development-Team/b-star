@@ -90,7 +90,7 @@ class Clean(cmd.Cog):
 		if is_dm(ctx):
 			await ctx.respond("💀 **This command is only usable in a server channel!**")
 			return
-		
+
 		if is_slash_cmd(ctx):
 			await ctx.interaction.response.defer()
 
@@ -101,7 +101,7 @@ class Clean(cmd.Cog):
 			"-silent": False
 		}
 
-		if len(clean_args) == 0:
+		if not clean_args:
 			keyword_info["-limit"] = _limit if _limit is not None else ''
 			keyword_info["-since"] = _since if _since is not None else ''
 			keyword_info["-from"] = _from if _from is not None else ''
@@ -112,27 +112,27 @@ class Clean(cmd.Cog):
 
 			current = ""
 			for a in l_args:
-				if a in keyword_info.keys():
+				if a in keyword_info:
 					current = a
 
 					if a == "-silent":
 						keyword_info[current] = True
 
 					continue
-				
+
 				try:
 					keyword_info[current] += (" " if len(keyword_info[current]) > 0 else "") + a
 				except KeyError:
 					pass
-		
+
 		if not keyword_info["-limit"] and not keyword_info["-since"]:
 			await ctx.respond("💀 **You must include a `-limit` keyword or a `-since` keyword!**")
 			return
-		
+
 		if keyword_info["-limit"] and not is_whole(keyword_info["-limit"]):
 			await ctx.respond("💀 **The message limit (`-limit`) must be a whole number!**")
 			return
-		
+
 		if keyword_info["-limit"]:
 			limit = int(keyword_info["-limit"])
 
@@ -141,22 +141,18 @@ class Clean(cmd.Cog):
 				return
 		else:
 			limit = 1000
-		
+
 		if keyword_info["-since"] and not is_whole(keyword_info["-since"]):
 			await ctx.respond("💀 **The `-since` parameter must be an ID!**")
 			return
-		
-		if keyword_info["-since"]:
-			since = int(keyword_info["-since"])
-		else:
-			since = None
 
+		since = int(keyword_info["-since"]) if keyword_info["-since"] else None
 		r_names = [r.name for r in ctx.guild.roles]
 		r_ids = [[str(r.id)] for r in ctx.guild.roles]
 
 		m_names = [m.name for m in ctx.guild.members]
 		m_ids = [[str(m.id)] for m in ctx.guild.members]
-		
+
 		targets = None
 
 		if keyword_info["-from"]:
@@ -178,9 +174,9 @@ class Clean(cmd.Cog):
 					role_obj = dc.utils.get(ctx.guild.roles, name=r[1])
 					targets += role_obj.members
 					continue
-			
+
 			targets = set(targets)
-		
+
 		action_confirmed = [None]
 		c_msg, msg_view = await confirm_action(ctx, action_confirmed, create=True)
 
@@ -188,24 +184,27 @@ class Clean(cmd.Cog):
 
 		if not action_confirmed[0]:
 			return
-		
+
 		limit += 2
 
 		def check(msg):
 			status = True
 
-			if not is_slash_cmd(ctx):
-				if not keyword_info["-silent"] and msg.id in [c_msg.id, ctx.message.id]:
-					status = False
-			
+			if (
+				not is_slash_cmd(ctx)
+				and not keyword_info["-silent"]
+				and msg.id in [c_msg.id, ctx.message.id]
+			):
+				status = False
+
 			if since is not None:
 				status = status and msg.id >= since
-			
+
 			if targets is not None:
 				status = status and msg.author in targets
-			
+
 			return status
-		
+
 		deleted = await ctx.channel.purge(limit=limit, check=check)
 
 		if not keyword_info["-silent"]: 
@@ -214,7 +213,7 @@ class Clean(cmd.Cog):
 			await c_msg.edit(content=m_line(f"""
 			✅ **Successfully searched {limit} message{plural(limit)}, deleted {len(deleted)}!**
 			"""))
-		
+
 		else:
 			if is_slash_cmd(ctx):
 				# TODO: make sure this line sends the correct amount in every case

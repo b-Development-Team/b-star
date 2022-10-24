@@ -167,10 +167,10 @@ class Database:
 		# Check if table is in the working schema
 		if table not in cls.get_tables(debug=debug):
 			raise NameError(f"Table named {table} is not in the {cls.schema(debug)} schema.")
-		
+
 		if len(columns) == 0:
 			raise ValueError("No columns have been provided for the add command.")
-		
+
 		# Full table identifier with schema and table name
 		table_code = f"{cls.schema(debug)}.{table.lower()}"
 
@@ -181,7 +181,7 @@ class Database:
 				if data_type not in ["text", "real", "integer"]:
 					raise TypeError(
 					f"Data type provided is not text, real, nor integer, but rather {data_type}.")
-				
+
 				cursor.execute(SQL("""
 					ALTER TABLE {table_name} 
 					ADD {col_name} {col_type}
@@ -190,7 +190,7 @@ class Database:
 					col_name = Identifier(name),
 					col_type = Identifier(data_type)
 				))
-		
+
 		return
 	
 	@classmethod
@@ -208,20 +208,18 @@ class Database:
 		# Check if table is in the working schema
 		if table not in cls.get_tables(debug=debug):
 			raise NameError(f"Table named {table} is not in the {cls.schema(debug)} schema.")
-		
+
 		if len(columns) == 0:
 			raise ValueError("No columns have been provided for the get command.")
-		
+
 		table_columns = cls.get_columns(table, debug=debug)
 		invalid_cols = [col for col in columns if col not in table_columns and col not in ["*"]]
 		invalid_cols += [col for col in conditions.keys() if col not in table_columns]
 
-		invalid_cols = list(set(invalid_cols))
-
-		if len(invalid_cols) > 0:
+		if invalid_cols := list(set(invalid_cols)):
 			raise NameError(
 			f"The following columns are not in {table}: {grammar_list(invalid_cols)}")
-		
+
 		# Full table identifier with schema and table name
 		table_code = f"{cls.schema(debug)}.{table.lower()}"
 
@@ -260,9 +258,9 @@ class Database:
 			), 
 				list(conditions.values())
 			)
-			
+
 			output = cursor.fetchall()
-		
+
 		return output
 	
 	@classmethod
@@ -322,14 +320,14 @@ class Database:
 		# Check if table is in the working schema
 		if table not in cls.get_tables(debug=debug):
 			raise NameError(f"Table named {table} is not in the {cls.schema(debug)} schema.")
-		
-		table_columns = cls.get_columns(table, debug=debug)
-		invalid_cols = [col for col in conditions.keys() if col not in table_columns]
 
-		if len(invalid_cols) > 0:
+		table_columns = cls.get_columns(table, debug=debug)
+		if invalid_cols := [
+			col for col in conditions.keys() if col not in table_columns
+		]:
 			raise NameError(
 			f"The following columns are not in {table}: {grammar_list(invalid_cols)}")
-		
+
 		table_code = f"{cls.schema(debug)}.{table.lower()}"
 
 		condition_code = ""
@@ -361,7 +359,7 @@ class Database:
 			), 
 				list(conditions.values())
 			)
-		
+
 		return
 	
 	@classmethod
@@ -422,20 +420,18 @@ class Database:
 		# Check if table is in the working schema
 		if table not in cls.get_tables(debug=debug):
 			raise NameError(f"Table named {table} is not in the {cls.schema(debug)} schema.")
-		
+
 		if len(columns.keys()) == 0:
 			raise ValueError("No columns have been provided for the get command.")
-		
+
 		table_columns = cls.get_columns(table, debug=debug)
 		invalid_cols = [col for col in columns.keys() if col not in table_columns]
 		invalid_cols += [col for col in conditions.keys() if col not in table_columns]
 
-		invalid_cols = list(set(invalid_cols))
-
-		if len(invalid_cols) > 0:
+		if invalid_cols := list(set(invalid_cols)):
 			raise NameError(
 			f"The following columns are not in {table}: {grammar_list(invalid_cols)}")
-		
+
 		# Full table identifier with schema and table name
 		table_code = f"{cls.schema(debug)}.{table.lower()}"
 
@@ -459,7 +455,7 @@ class Database:
 					conditions[col] = float(conditions[col])
 
 			condition_code = "WHERE " + " AND ".join([f"{col} = %s" for col in conditions.keys()])
-		
+
 		col_indices = [table_columns.index(col) for col in columns.keys()]
 		col_types = [typed_columns[i][1] for i in col_indices]
 
@@ -484,5 +480,5 @@ class Database:
 			), 
 				list(columns.values()) + list(conditions.values())
 			)
-		
+
 		return

@@ -38,7 +38,7 @@ class Help(cmd.Cog):
 
 		if is_slash_cmd(ctx):
 			await ctx.interaction.response.defer()
-		
+
 		all_commands = self.BRAIN.cogs
 		all_commands = {
 			k: v for k, v in all_commands.items() 
@@ -52,12 +52,12 @@ class Help(cmd.Cog):
 		else:
 			search_term = command_or_page.lower()
 
-		page_options = []
+		page_options = [
+			dc.SelectOption(
+				label="General Bot Information", value="general_help_page", emoji="⚙️"
+			)
+		]
 
-		page_options.append(
-			dc.SelectOption(label="General Bot Information",
-			value="general_help_page", emoji="⚙️")
-		)
 
 		for cmd_n, cmd_obj in all_commands.items():
 
@@ -66,14 +66,15 @@ class Help(cmd.Cog):
 				value=cmd_n, emoji=cmd_obj.EMOJI)
 			)
 
-			if not found_term:
-				if search_term == cmd_n.lower() or search_term in cmd_obj.ALIASES:
-					found_term = cmd_n.lower()
+			if not found_term and (
+				search_term == cmd_n.lower() or search_term in cmd_obj.ALIASES
+			):
+				found_term = cmd_n.lower()
 
 		if not found_term:
 			await ctx.respond("💀 Could not find a command or category under that search term!")
 			return
-		
+
 		help_dropdown = Select(
 			placeholder = "Choose a category or command to get info on!",
 			options = page_options,
@@ -103,7 +104,7 @@ class Help(cmd.Cog):
 
 		help_embed, full_view, display_view = await self.help_page(term=found_term,
 		cmd_user=command_user(ctx), full_view=full_view)
-		
+
 		help_msg = await ctx.respond(embed=help_embed, view=display_view)
 
 		# Update the callback to have the full message view baked in for compatibility
@@ -113,7 +114,7 @@ class Help(cmd.Cog):
 		next_page_button.callback = cb_help
 
 		await display_view.wait()
-		
+
 		await help_msg.edit(view=None)
 
 		return
@@ -127,12 +128,12 @@ class Help(cmd.Cog):
 		page_n = 1
 		page_total = 1
 
-		if not ctx is None: # If this is an Interaction, find the search term + interaction data
+		if ctx is not None: # If this is an Interaction, find the search term + interaction data
 			if 'values' in ctx.data.keys():
 				term = ctx.data['values'][0]
 			else:
 				term = ctx.data['custom_id'].split(" ")[-1]
-			
+
 			c_id_args = ctx.data['custom_id'].split(" ")
 
 			cmd_user_id = int(c_id_args[0])
@@ -141,12 +142,12 @@ class Help(cmd.Cog):
 			if ctx.user.id != cmd_user_id: # Only the command user can use the view
 				await ctx.response.defer()
 				return
-			
+
 			if len(c_id_args) > 3: # Get new page number from button interaction
 				page_n = int(c_id_args[2][1:])
 
 		help_embed = dc.Embed(color=0x31D8B1)
-		
+
 		full_info = self.BRAIN.cogs
 		full_info = {
 			k: v for k, v in full_info.items() 
@@ -195,7 +196,7 @@ class Help(cmd.Cog):
 						help_embed.add_field(name="💬 **Cooldown**", inline=True,
 						value=f"{int(cmd_func.cooldown.per)} second{plural(cmd_func.cooldown.per)}"
 						)
-					
+
 					if len(cmd_obj.ALIASES) != 0:
 						aliases = '\n'.join([f"`{PREFIX}{a}`" for a in cmd_obj.ALIASES])
 						help_embed.add_field(name="📜 **Aliases**", inline=True,
@@ -221,20 +222,20 @@ class Help(cmd.Cog):
 						if ((len(cmd_info[-1] + l + "\n\n") > 700 and cmd_info[-1] != "")
 							or l == '</>'):
 							cmd_info.append("")
-						
+
 						if l != '</>':
 							cmd_info[-1] += l + "\n\n"
-					
+
 					page_total = len(cmd_info)
-					
+
 					help_embed.description = cmd_info[0].strip() + "\n\u200b"
-					
+
 					if page_total > 1:
 						help_embed.description = cmd_info[page_n-1].strip()
 						help_embed.description += (
 						f"\n\n```diff\n+ Page {page_n} of {page_total} +```")
-						
-		
+
+
 		# Flavor text partially for fun, partially to indicate who called the command
 		# (Relevant since only the command user can interact with the dropdown)
 		footer_text = rng.choice([
@@ -248,10 +249,10 @@ class Help(cmd.Cog):
 			"Thanks, {}, and have fun!",
 			"What will {} look for next?"
 		])
-		
+
 		help_embed.set_footer(text=footer_text.format(cmd_user.name),
 		icon_url=cmd_user.display_avatar.url)
-		
+
 		new_items = []
 
 		for c in full_view.children:
@@ -262,29 +263,21 @@ class Help(cmd.Cog):
 					c_id_args.append(term)
 				else:
 					c_id_args[-1] = term
-			
+
 			elif type(c).__name__ == "Button":
 				if len(c_id_args) == 3:
 					c_id_args.append(term)
 				else:
 					c_id_args[-1] = term
 
-				if c.emoji.name == "⬅️":
-					c_id_args[-2] = f"p{page_n-1}"
-
-					if page_n == 1:
-						c.disabled = True
-					else:
-						c.disabled = False
-				
 				if c.emoji.name == "➡️":
 					c_id_args[-2] = f"p{page_n+1}"
 
-					if page_n >= page_total:
-						c.disabled = True
-					else:
-						c.disabled = False
-					
+					c.disabled = page_n >= page_total
+				elif c.emoji.name == "⬅️":
+					c_id_args[-2] = f"p{page_n-1}"
+
+					c.disabled = page_n == 1
 			c.custom_id = " ".join(c_id_args)
 
 			new_items.append(c)
@@ -301,6 +294,5 @@ class Help(cmd.Cog):
 
 		if ctx is None:
 			return [help_embed, full_view, display_view]
-		else:
-			await ctx.response.edit_message(embed=help_embed, view=display_view)
-			return
+		await ctx.response.edit_message(embed=help_embed, view=display_view)
+		return

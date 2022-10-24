@@ -47,7 +47,7 @@ class Typingtest(cmd.Cog):
 		start_timestamp = await command_response_timestamp(ctx, tt)
 
 		msg = await self.BRAIN.wait_for('message', check=(lambda m: m.channel == tt.channel and m.author == user))
-		
+
 		typed_words = msg.content.lower().split(' ')
 		duration = round(msg.created_at.timestamp() - start_timestamp, 3)
 

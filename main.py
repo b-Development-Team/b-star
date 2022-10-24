@@ -31,7 +31,7 @@ async def on_ready():
 		if arg.startswith("1_report_guild:"):
 			if arg[len("1_report_guild:"):] == "":
 				continue
-			
+
 			restart_rep_sv = dc.utils.get(BRAIN.guilds,
 				id=int(arg[len("1_report_guild:"):]))
 
@@ -44,14 +44,14 @@ async def on_ready():
 
 					except dc.errors.NotFound:
 						continue
-				
+
 			else:
 				restart_rep_ch = dc.utils.get(restart_rep_sv.channels,
 					id=int(arg[len("2_report_chnl:"):]))
 
 		if arg.startswith("3_report_time:"):
 			restart_rep_t = int(arg[len("3_report_time:"):])/1000
-		
+
 	if restart_rep_t is not None:
 		t_taken = round(time() - restart_rep_t, 2)
 		await restart_rep_ch.send(
@@ -66,15 +66,15 @@ async def on_ready():
 		cog_obj = BRAIN.get_cog(cog_name)
 
 		# Check for a task/event that could have a setting to be turned on while connecting
-		if not "ON_BY_DEFAULT" in dir(cog_obj) or not "set_loop" in dir(cog_obj):
+		if "ON_BY_DEFAULT" not in dir(cog_obj) or "set_loop" not in dir(cog_obj):
 			continue
-		
+
 		getattr(cog_obj, "ON_BY_DEFAULT")
-		
+
 		if getattr(cog_obj, "ON_BY_DEFAULT"):
 			getattr(cog_obj, "set_loop")(True)
 			print(f"Automatically starting all loops in {type(cog_obj).__name__.upper()}")
-	
+
 	print("\n" + "="*50, '\n')
 
 @BRAIN.event
@@ -87,20 +87,20 @@ async def on_application_command_error(ctx, error): # For slash commands
 
 async def error_handler(ctx, err):
 	if type(err) == cmd.errors.CommandNotFound:
-		await ctx.respond(f"⚠️ This command or alias does not exist!")
+		await ctx.respond("⚠️ This command or alias does not exist!")
 		return
-	
+
 	if type(err) in [dc.errors.CheckFailure, cmd.errors.CheckFailure]:
 		await ctx.respond("⚠️ You do not have permission to run this command!")
 		return
-	
+
 	if type(err) == cmd.errors.CommandOnCooldown:
 		if is_slash_cmd(ctx):
 			await ctx.respond("💬 **This command is on cooldown right now!**")
 		else:
 			await ctx.message.add_reaction("💬")
 		return
-	
+
 	print("-[ERROR]- "*10)
 	tb.print_exception(type(err), err, None)
 
@@ -112,7 +112,7 @@ async def error_handler(ctx, err):
 		f"⚠️ Uh oh! This command raised an unexpected error: **`{type(err).__name__}`**")
 	except Exception as e:
 		print(f"\nCouldn't inform user of error due to {type(e).__name__}!")
-	
+
 	print("-[ERROR]- "*10, '\n')
 
 @BRAIN.event

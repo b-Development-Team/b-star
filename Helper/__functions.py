@@ -14,7 +14,7 @@ def split_escape(s, delimiter):
 
 	if delimiter == '"':
 		return s.split('"')
-	
+
 	parsed = ""
 	escaped = ""
 	backslashed = False
@@ -25,22 +25,18 @@ def split_escape(s, delimiter):
 		if c == '"' and not backslashed:
 			escaped = not escaped
 			add_to_parsed = False
-		
+
 		if c == '\\' and not backslashed:
 			backslashed = True
 			continue
-	
+
 		if backslashed:
 			backslashed = False
-		
+
 		if not add_to_parsed:
 			continue
-		
-		if c == delimiter and not escaped:
-			parsed += "\t"
-		else:
-			parsed += c
-	
+
+		parsed += "\t" if c == delimiter and not escaped else c
 	return [s.strip() for s in parsed.split("\t")]
 
 def f_caps(s):
@@ -119,13 +115,11 @@ def grammar_list(listed, conj="and"):
 
 	if len(listed) == 0: return "none"
 	if len(listed) == 1: return listed[0]
-	
+
 	comma_section = ", ".join(listed[:-1])
 	final_element = listed[-1]
 
-	final_str = f" {conj} ".join([comma_section, final_element])
-
-	return final_str
+	return f" {conj} ".join([comma_section, final_element])
 
 def is_dm(ctx):
 	'''
@@ -148,10 +142,7 @@ def command_user(ctx):
 	well as component interactions.
 	'''
 
-	if not is_slash_cmd(ctx):
-		return ctx.message.author
-	else:
-		return ctx.user
+	return ctx.user if is_slash_cmd(ctx) else ctx.message.author
 
 async def command_response_timestamp(ctx, response):
 	'''
@@ -161,9 +152,8 @@ async def command_response_timestamp(ctx, response):
 
 	if not is_slash_cmd(ctx):
 		return response.created_at.timestamp()
-	else:
-		response_msg = await response.original_response()
-		return response_msg.created_at.timestamp()
+	response_msg = await response.original_response()
+	return response_msg.created_at.timestamp()
 
 def m_line(s):
 	'''

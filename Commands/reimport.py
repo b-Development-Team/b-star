@@ -38,14 +38,14 @@ class Reimport(cmd.Cog):
 		if cmd_name is None:
 			await ctx.respond("💀 Include the name of the command to import.")
 			return
-		
+
 		cmd_name = cmd_name.lower()
 
 		if f"{cmd_name}.py" not in os.listdir("Commands"):
 			if is_slash_cmd(ctx):
 				await ctx.respond("💀 That command does not exist.")
 				return
-			
+
 			if len(ctx.message.attachments) != 0:
 				await ctx.message.attachments[0].save(f"Commands/{cmd_name}.py")
 
@@ -69,7 +69,7 @@ class Reimport(cmd.Cog):
 
 			await ctx.respond("✅ **Command file created successfully.**")
 			return
-		
+
 		else:
 			with open(f"Commands/{cmd_name}.py", "r", encoding="utf-8") as f:
 				backup_cmd = f.read()
@@ -96,7 +96,7 @@ class Reimport(cmd.Cog):
 				The reimport command has been cancelled.
 				"""))
 				return
-			
+
 			f_name = f"Commands/BACKUP_{cmd_name}_{int(time())}.py"
 
 			with open(f_name, 'w', encoding='utf-8') as f:

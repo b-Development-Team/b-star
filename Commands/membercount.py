@@ -45,31 +45,31 @@ class Membercount(cmd.Cog):
 		server_picked = [None]
 		msg = None
 
-		if len(server_args) > 0:
+		if server_args:
 			server_search_term = " ".join(server_args)
 
 			server_names = [g.name for g in self.BRAIN.guilds]
 
 			if is_whole(server_search_term):
 				match = dc.utils.get(self.BRAIN.guilds, id=int(server_search_term))
-				
+
 				if match is not None:
 					server_picked = [match]
-			
+
 			elif (match := smart_lookup(server_search_term, server_names)):
 				server_picked = [self.BRAIN.guilds[server_names.index(match[1])]]
 
-		
+
 		if server_picked[0] is None:
 			if is_dm(ctx):
 				msg, msg_view = await specify_server(ctx, server_picked, create=True)
 
 				if msg_view is not None:
 					await msg_view.wait()
-				
+
 				if server_picked[0] is None: # Happens if the view times out without an answer
 					return
-			
+
 			else:
 				server_picked = [ctx.guild]
 

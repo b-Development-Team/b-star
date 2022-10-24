@@ -49,11 +49,7 @@ class Talk(cmd.Cog):
 		channel_id = int(channel_id)
 		chosen_channel = None
 
-		if is_dm(ctx):
-			staff_s = staff_servers(ctx)
-		else:
-			staff_s = [ctx.guild]
-
+		staff_s = staff_servers(ctx) if is_dm(ctx) else [ctx.guild]
 		for s in staff_s:
 			s_channel_ids = [c.id for c in s.channels]
 			s_member_ids = [m.id for m in s.members]
@@ -61,20 +57,20 @@ class Talk(cmd.Cog):
 			if channel_id in s_channel_ids: # Choose either a channel...
 				chosen_channel = dc.utils.get(s.channels, id=channel_id)
 				break
-			
+
 			if channel_id in s_member_ids: # ...or a member to DM
 				chosen_channel = dc.utils.get(s.members, id=channel_id)
 				break
-		
+
 		if chosen_channel is None:
 			if is_dm(ctx):
 				await ctx.respond(
 				"💀 **This channel/member can't be found** in any servers you moderate!")
-			
+
 			else:
 				await ctx.respond(
 				"💀 **This channel/member can't be found** in this server!")
-			
+
 			return
 
 		if is_slash_cmd(ctx):

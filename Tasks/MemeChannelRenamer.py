@@ -55,7 +55,7 @@ class MemeChannelRenamer(cmd.Cog):
 	@cmd.check(is_dev)
 	async def edit(self, ctx, parameter, *value):
 		cog_attrs = [m[0] for m in inspect.getmembers(cmd.Cog)]
-		task_attrs = [m for m in inspect.getmembers(self)]
+		task_attrs = list(inspect.getmembers(self))
 
 		# Hardcoded here are default parameters that the command user shouldn't have access to
 		attrs = [m for m in task_attrs if m[0] not in (cog_attrs + 
@@ -63,11 +63,14 @@ class MemeChannelRenamer(cmd.Cog):
 		)]
 
 		# Exclude functions, loops and commands from the attributes list
-		attrs = [m for m in attrs if (
-			not inspect.ismethod(m[1]) and
-			not type(m[1]) == tasks.Loop and
-			not type(m[1]) == cmd.core.Command
-		)]
+		attrs = [
+			m
+			for m in attrs
+			if not inspect.ismethod(m[1])
+			and type(m[1]) != tasks.Loop
+			and type(m[1]) != cmd.core.Command
+		]
+
 
 		param_list = [p[0] for p in attrs]
 
@@ -75,7 +78,7 @@ class MemeChannelRenamer(cmd.Cog):
 			await ctx.respond(m_line(f"""💀 **Invalid parameter `{parameter.upper()}`!** 
 			Available parameters are: /n/> **`{", ".join(param_list)}`**"""))
 			return
-		
+
 		i = param_list.index(parameter.upper())
 		value = " ".join(value)
 
@@ -89,7 +92,7 @@ class MemeChannelRenamer(cmd.Cog):
 				value = float(value)
 			elif len(split_escape(value, ", ")) > 1:
 				value = split_escape(value)
-			
+
 			# If all of these fail, keep it a string
 
 		setattr(self, parameter.upper(), value)

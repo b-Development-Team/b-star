@@ -138,8 +138,9 @@ class Database(cmd.Cog):
 		# they have different functions in a command like this
 		if is_slash_cmd(ctx):
 			original_query = "".join(
-				[a + " " if a != "\\n" else "\n" for a in cmd_args]
+				[f"{a} " if a != "\\n" else "\n" for a in cmd_args]
 			).strip()
+
 
 		else:
 			# Test for both `tc/database subcommand` AND `tc/database\nsubcommand`
@@ -161,9 +162,12 @@ class Database(cmd.Cog):
 		}
 
 		for _ in range(len(modif.keys())):
-			if (not len(arg_matrix) == 0 and len(arg_matrix[-1]) == 1
-				and arg_matrix[-1][0].lower() in modif.keys()):
-				
+			if (
+				len(arg_matrix) != 0
+				and len(arg_matrix[-1]) == 1
+				and arg_matrix[-1][0].lower() in modif
+			):
+
 				modif[arg_matrix[-1][0].lower()] = True
 				arg_matrix = arg_matrix[:-1]
 
@@ -176,7 +180,7 @@ class Database(cmd.Cog):
 
 			await ctx.respond(f"🗂️ **Here are all the tables in the database:**\n> {tables}")
 			return
-		
+
 		# Position in the argument matrix
 		line, arg_n = (0, 0)
 
@@ -193,7 +197,7 @@ class Database(cmd.Cog):
 			await ctx.respond(
 			f"💀 **This is not a valid subcommand!** Valid subcommands are:\n> {v_subcmds}")
 			return
-		
+
 		# Add a table to the database
 		if arg_matrix[line][arg_n].lower() == "add":
 			line, arg_n, _ = step_forward()
@@ -213,12 +217,11 @@ class Database(cmd.Cog):
 				try:
 					column_name = arg_matrix[line][arg_n].lower()
 				except IndexError:
-					if len(columns) == 0:
-						await ctx.respond("💀 **You must include the new table's columns!**")
-						return
-					else:
+					if columns:
 						break
-				
+
+					await ctx.respond("💀 **You must include the new table's columns!**")
+					return
 				line, arg_n, _ = step_forward()
 
 				try:
@@ -227,11 +230,11 @@ class Database(cmd.Cog):
 					await ctx.respond(
 					f"💀 **Column `{column_name.upper()}` has no specified data type!**")
 					return
-				
+
 				columns.append([column_name, column_type])
 
 				line, arg_n, _ = step_forward()
-			
+
 			DB.add_table(table_name, columns, debug=modif["debug"])
 
 			columns_summary = "/n/".join(["> " + ": ".join(col) for col in columns])
@@ -240,7 +243,7 @@ class Database(cmd.Cog):
 				✅ **Table {table_name.upper()} has been created** with the columns:/n/
 				{columns_summary}"""))
 			return
-		
+
 		# Drop a table from the database
 		if arg_matrix[line][arg_n].lower() == "remove":
 			line, arg_n, _ = step_forward()
@@ -250,7 +253,7 @@ class Database(cmd.Cog):
 			except IndexError:
 				await ctx.respond("💀 **You must include the name of the table to remove!**")
 				return
-			
+
 			action_confirmed = [None]
 			msg, msg_view = await confirm_action(ctx, action_confirmed, create=True)
 
@@ -260,14 +263,14 @@ class Database(cmd.Cog):
 				return
 
 			DB.remove_table(table_name, debug=modif["debug"])
-			
+
 			if is_slash_cmd(ctx):
 				await msg.edit_original_message(view=None, content=
 				f"✅ **Table {table_name.upper()} has been removed** from the database!")
 			else:
 				await msg.edit(view=None, content=
 				f"✅ **Table {table_name.upper()} has been removed** from the database!")
-			
+
 			return
 
 		# Print the layout of a database
@@ -279,7 +282,7 @@ class Database(cmd.Cog):
 			except IndexError:
 				await ctx.respond("💀 **You must include the name of the table to inspect!**")
 				return
-			
+
 			layout = DB.get_columns(table_name, include_type=True, debug=modif["debug"])
 
 			columns_summary = "\n".join(["> " + ": ".join(col) for col in layout])
@@ -287,7 +290,7 @@ class Database(cmd.Cog):
 			await ctx.respond(
 			f"📋 **Table {table_name.upper()} has the following layout:**\n{columns_summary}")
 			return
-		
+
 		# Subcommand to deal with the entries - has 4 separate submodes
 		if arg_matrix[line][arg_n].lower() == "entries":
 			line, arg_n, _ = step_forward()
@@ -297,7 +300,7 @@ class Database(cmd.Cog):
 			except IndexError:
 				await ctx.respond("💀 **You must include the name of the table!**")
 				return
-			
+
 			submodes = ["add", "remove", "edit"]
 
 			line, arg_n, _ = step_forward()
@@ -310,7 +313,7 @@ class Database(cmd.Cog):
 			# No submode: command to get entries
 			if submode_chosen not in submodes:
 				conditions_get = {}
-				
+
 				entry_limit = None
 
 				if arg_matrix[-1][0].lower() == 'limit' and len(arg_matrix[-1] == 2):
@@ -336,19 +339,19 @@ class Database(cmd.Cog):
 							💀 **You must separate the condition column and value with an equals 
 							sign!**/n/> `{''.join(full_condition)}`"""))
 							return
-						
+
 						eq_index = full_condition.index("=")
-						
+
 						condition_column = " ".join(full_condition[:eq_index])
 						condition_value = " ".join(full_condition[eq_index+1:])
-						
-						if len(condition_column) == 0:
+
+						if not condition_column:
 							await ctx.respond(m_line(f"""
 							💀 **You must include a column in your condition!**/n/
 							> `{''.join(full_condition)}`"""))
 							return
-						
-						if len(condition_value) == 0:
+
+						if not condition_value:
 							await ctx.respond(m_line(f"""
 							💀 **You must include a value in your condition!**/n/
 							> `{''.join(full_condition)}`"""))
@@ -357,7 +360,7 @@ class Database(cmd.Cog):
 						conditions_get[condition_column] = condition_value
 
 						line += 1
-					
+
 				entries = DB.get_entries(table_name, conditions=conditions_get, 
 				debug=modif["debug"], limit=entry_limit)
 
@@ -368,8 +371,6 @@ class Database(cmd.Cog):
 					message_lines = [f"TABLE {table_name} {'DEBUG' if modif['debug'] else ''}"]
 					message_lines += ["\t".join(columns_listed)]
 					message_lines += ["\t".join([str(val) for val in entry]) for entry in entries]
-					message_lines += ["END TABLE"]
-
 				else:
 					message_lines = ([f"TABLE {table_name} {'DEBUG' if modif['debug'] else ''}"]
 						+ [""] * (len(entries) + 1))
@@ -384,9 +385,9 @@ class Database(cmd.Cog):
 						for v_ind, val in enumerate(col_data):
 							space_align = (max_col_length + 4) - (len(val))
 							message_lines[v_ind + 2] += val + " " * space_align
-					
-					message_lines += ["END TABLE"]
-				
+
+				message_lines += ["END TABLE"]
+
 				entry_count = len(message_lines) - 3
 				message_lines = "\n".join(message_lines)
 
@@ -401,7 +402,7 @@ class Database(cmd.Cog):
 					), file=dc.File(f_name))
 
 					os.remove(f_name)
-				
+
 					return
 
 				await ctx.respond(m_line(f"""

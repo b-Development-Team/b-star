@@ -67,10 +67,7 @@ def is_staff(ctx):
 
 	staff_in = staff_servers(ctx)
 
-	if is_dm(ctx): # Is the member staff somewhere
-		return (len(staff_in) > 0)
-	else: # Is the member staff in the server
-		return (ctx.guild in staff_in)
+	return (len(staff_in) > 0) if is_dm(ctx) else (ctx.guild in staff_in)
 
 def is_staff_here(ctx):
 	'''
