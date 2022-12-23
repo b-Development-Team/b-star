@@ -12,9 +12,13 @@ def HELP(PREFIX):
 		"MAIN": "Testing command.",
 		"FORMAT": "",
 		"CHANNEL": 0,
-		"USAGE": f"""idk lol
-		""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Fun"
+		"USAGE": """idk lol
+		""".replace(
+			"\n", ""
+		).replace(
+			"\t", ""
+		),
+		"CATEGORY": "Fun",
 	}
 
 PERMS = 0 # Non-members

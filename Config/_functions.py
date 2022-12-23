@@ -35,14 +35,14 @@ def grammar_list(listed, c_or=False):
 
 # make_letter_tint : Returns a color for a book depending on the letter
 def make_letter_tint(char):
-    char = char.upper()
-    charcode = ord(char)
-    if char >= "0" and char <= "9":
-        hue1 = (charcode - ord("0")) / 10
-    else:
-        hue1 = (charcode - ord("A")) / 26 % 1
-    hue360 = hue1 * 255
-    return tuple((int(hue360), 153, 255))
+	char = char.upper()
+	charcode = ord(char)
+	if char >= "0" and char <= "9":
+	    hue1 = (charcode - ord("0")) / 10
+	else:
+	    hue1 = (charcode - ord("A")) / 26 % 1
+	hue360 = hue1 * 255
+	return int(hue360), 153, 255
 
 
 # make_book : Generates a book image for a given contestant name
@@ -107,10 +107,7 @@ def is_whole(s):
 	try:
 		es = int(s)
 		es2 = float(s)
-		if es2 - es == 0:
-			return True
-		else:
-			return False
+		return es2 - es == 0
 	except:
 		return False
 
@@ -120,10 +117,7 @@ def is_float(s):
 	try:
 		es = int(s)
 		es2 = float(s)
-		if es2 - es != 0:
-			return True
-		else:
-			return False
+		return es2 - es != 0
 	except:
 		try:
 			es2 = float(s)

@@ -86,7 +86,7 @@ class SC_Contestant:
 async def get_positive_integer(user, channel):
 	
 	admin_input = None
-	while admin_input == None:
+	while admin_input is None:
 
 		msg = await BRAIN.wait_for('message', check=lambda m: (m.author == user and m.channel == channel))
 
@@ -155,107 +155,98 @@ class EVENT:
 		if self.GAME_STARTED == False:
 
 			# Check if message is in administration channel
-			if channel == self.param["ADMIN_CHANNEL"]:
-
-				# Check if user wants to start game or not
-				if message.content.upper() == "START":
-
+			if (
+				channel == self.param["ADMIN_CHANNEL"]
+				and message.content.upper() == "START"
+			):
 					# Send message with buttons saying to start
-					await channel.send("There are **{}** participants. Type `confirm` to start the game or type anything else to cancel.".format(len(self.param["ROLE"].members)))
-			
-					msg = await BRAIN.wait_for('message', check=lambda m: (m.author == user and m.channel == channel))
+				await channel.send(
+					f'There are **{len(self.param["ROLE"].members)}** participants. Type `confirm` to start the game or type anything else to cancel.'
+				)
 
-					if msg.content.upper() == "CONFIRM":
+				msg = await BRAIN.wait_for('message', check=lambda m: (m.author == user and m.channel == channel))
 
-						# Start game
-						await self.start_game()
+				if msg.content.upper() == "CONFIRM":
 
+					# Start game
+					await self.start_game()
+
+				else:
+
+					# Cancel start
+					await channel.send("Start cancelled. Send `START` to prompt the start.")
+
+		elif (
+			self.info["GUESSING_OPEN"] == True
+			and isinstance(channel, discord.channel.DMChannel)
+			and user in self.info["CONTESTANTS"].keys()
+		):
+			# Check if this is a guess from the player (check if content of message is integer)
+			user_answer = None
+			try:
+				user_answer = int(message.content)
+			except:
+				pass
+
+			if user_answer != None:
+
+				# This is an answer from the user
+				# Get user's player object
+				player_object = self.info["CONTESTANTS"][user]
+				# Check if user has already used up all guesses
+				if player_object.guesses_left == 0: return
+
+				# Check if user has already answered correctly before
+				if player_object.correct == True: return
+
+				# User is able to answer, so add their answers to the guess list
+				player_object.set_guesses.append(user_answer)
+				# Check if user answered correctly
+				if user_answer == self.info["SET_INFO"]["CORRECT_ANSWER"]:
+
+					player_object.correct = True
+					# Find timestamp of guess message
+					guess_timestamp = message.created_at.timestamp()
+					# Check how much time it took user to guess correctly
+					guess_time = guess_timestamp - self.info["SET_INFO"]["START_TIME"]
+					# Add any penalties
+					penalty_amount = len(player_object.set_guesses) - 1
+					penalty_total = penalty_amount * self.param["PENALTY"]
+					final_guess_time = round(guess_time + penalty_total, 2)
+					# Make sure final guess time does not go over max
+					if final_guess_time > self.param["MAX_TIME"]:
+						final_guess_time = self.param["MAX_TIME"]
+
+					# Add time to round times
+					player_object.round_times.append(final_guess_time)
+
+					# Send message with reply, saying they got it correct
+					if penalty_amount == 0:
+						await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds.".format(final_guess_time))
+					elif penalty_amount == 1:
+						await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds (including **`{1}`** penalty worth **`{2}`** extra seconds).".format(final_guess_time, penalty_amount, penalty_total))
 					else:
+						await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds (including **`{1}`** penalties worth **`{2}`** extra seconds).".format(final_guess_time, penalty_amount, penalty_total))
 
-						# Cancel start
-						await channel.send("Start cancelled. Send `START` to prompt the start.")
+				# Check if user answered wrongly
+				else:
 
-		# Game has started
-		else:
+					# Remove one guess from user's guess amount
+					player_object.guesses_left -= 1
 
-			# Check if guessing is open for contestants
-			if self.info["GUESSING_OPEN"] == True:
-				
-				# Check if message occured in DMs
-				if isinstance(channel, discord.channel.DMChannel):
+					# If user has no more guesses then give them maximum time
+					if player_object.guesses_left == 0:
 
-					# Only users who are current contestants
-					if user in self.info["CONTESTANTS"].keys():
+						player_object.round_times.append(self.param["MAX_TIME"])
+						await channel.send("❌ **You used up all your guesses!** ❌\nYour time for this set is automatically set to **`{0:.2f}`**.".format(self.param["MAX_TIME"]))
 
-						# Check if this is a guess from the player (check if content of message is integer)
-						user_answer = None
-						try:
-							user_answer = int(message.content)
-						except:
-							pass
-
-						if user_answer != None:
-
-							# This is an answer from the user
-							# Get user's player object
-							player_object = self.info["CONTESTANTS"][user]
-							# Check if user has already used up all guesses
-							if player_object.guesses_left == 0: return
-
-							# Check if user has already answered correctly before
-							if player_object.correct == True: return
-
-							# User is able to answer, so add their answers to the guess list
-							player_object.set_guesses.append(user_answer)
-							# Check if user answered correctly
-							if user_answer == self.info["SET_INFO"]["CORRECT_ANSWER"]:
-
-								player_object.correct = True
-								# Find timestamp of guess message
-								guess_timestamp = message.created_at.timestamp()
-								# Check how much time it took user to guess correctly
-								guess_time = guess_timestamp - self.info["SET_INFO"]["START_TIME"]
-								# Add any penalties
-								penalty_amount = len(player_object.set_guesses) - 1
-								penalty_total = penalty_amount * self.param["PENALTY"]
-								final_guess_time = round(guess_time + penalty_total, 2)
-								# Make sure final guess time does not go over max
-								if final_guess_time > self.param["MAX_TIME"]:
-									final_guess_time = self.param["MAX_TIME"]
-
-								# Add time to round times
-								player_object.round_times.append(final_guess_time)
-
-								# Send message with reply, saying they got it correct
-								if penalty_amount == 0:
-									await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds.".format(final_guess_time))
-								elif penalty_amount == 1:
-									await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds (including **`{1}`** penalty worth **`{2}`** extra seconds).".format(final_guess_time, penalty_amount, penalty_total))
-								else:
-									await message.reply(content = "☑️ **Correct!** ☑️\nYou answered in **`{0:.2f}`** seconds (including **`{1}`** penalties worth **`{2}`** extra seconds).".format(final_guess_time, penalty_amount, penalty_total))
-
-							# Check if user answered wrongly
-							else:
-
-								# Remove one guess from user's guess amount
-								player_object.guesses_left -= 1
-
-								# If user has no more guesses then give them maximum time
-								if player_object.guesses_left == 0:
-
-									player_object.round_times.append(self.param["MAX_TIME"])
-									await channel.send("❌ **You used up all your guesses!** ❌\nYour time for this set is automatically set to **`{0:.2f}`**.".format(self.param["MAX_TIME"]))
-
-							# Check if all contestants have answered correctly or have run out of guesses
-							set_finished = True
-							for contestant in list(self.info["CONTESTANTS"].values()):
-
-								if contestant.correct == False and contestant.guesses_left > 0:
-									set_finished = False
-
+				set_finished = not any(
+					contestant.correct == False and contestant.guesses_left > 0
+					for contestant in list(self.info["CONTESTANTS"].values())
+				)
 							# If set finished is true, end set
-							if set_finished == True and self.info["GUESSING_OPEN"] == True:
-								await self.end_set()
+				if set_finished and self.info["GUESSING_OPEN"] == True:
+					await self.end_set()
 
 	# Function that starts the game
 	async def start_game(self):
@@ -271,7 +262,9 @@ class EVENT:
 
 		contestant_amount = len(self.info["CONTESTANTS"])
 		# Send message in announcement channel
-		await self.param["GAME_CHANNEL"].send("```SPEED COUNTER```\nWelcome to **Speed Counter!** There are **{}** contestants competing. Round 1 will start shortly.".format(contestant_amount))
+		await self.param["GAME_CHANNEL"].send(
+			f"```SPEED COUNTER```\nWelcome to **Speed Counter!** There are **{contestant_amount}** contestants competing. Round 1 will start shortly."
+		)
 
 		# Allow for admin modification of Round 1
 		self.info["ROUND_NUMBER"] += 1
@@ -361,10 +354,10 @@ class EVENT:
 		# Set amounts depending on ranges
 		emoji_count = random.randint(self.param["EMOJI_COUNT_RANGE"][0], self.param["EMOJI_COUNT_RANGE"][1])
 		emoji_type_amount = random.randint(self.param["EMOJI_TYPE_RANGE"][0], self.param["EMOJI_TYPE_RANGE"][1])
-		
+
 		# Randomize which emojis to use
 		emojis_in_set = []
-		for i in range(emoji_type_amount):
+		for _ in range(emoji_type_amount):
 			# Choose a random emoji from the emoji set
 			random_emoji_num = random.randint(0, len(emoji_set) - 1)
 			emoji_chosen = emoji_set[random_emoji_num]
@@ -372,23 +365,18 @@ class EVENT:
 			# Remove emoji from emoji set
 			emoji_set.pop(random_emoji_num)
 
-		# Choose which emojis that the player must count
-		emojis_counting = []
 		# Shuffle the emojis in set list
 		random.shuffle(emojis_in_set)
 
 		# Decide how many emojis the players must count
 		emoji_counting_types = random.randint(self.param["EMOJI_COUNTING_RANGE"][0], self.param["EMOJI_COUNTING_RANGE"][1])
 
-		for i in range(emoji_counting_types):
-			emojis_counting.append(emojis_in_set[i])
-
+		emojis_counting = [emojis_in_set[i] for i in range(emoji_counting_types)]
 		# Create the random string of emojis
 		chunks = [""]
 		emojis_in_chunk = 0
 		correct_emoji_count = 0
-		for i in range(emoji_count):
-
+		for _ in range(emoji_count):
 			# Get a random emoji from the emojis in set list
 			random_emoji = random.choice(emojis_in_set)
 			chunks[-1] += random_emoji
@@ -405,7 +393,7 @@ class EVENT:
 		################################################################
 
 		# Send set title to discord, along with what emoji they are counting
-		set_string = "__**SET #{}/{}**__\n\n".format(set_number, set_total)
+		set_string = f"__**SET #{set_number}/{set_total}**__\n\n"
 		if emoji_counting_types > 1:
 			set_string += "You are counting the emojis " + " ".join(emojis_counting) + ". Your answer should be the sum of these."
 		elif emoji_counting_types == 1:
@@ -437,7 +425,7 @@ class EVENT:
 		# Set timestamps
 		self.info["SET_INFO"]["START_TIME"] = latest_emoji_msg.created_at.timestamp()
 		self.info["SET_INFO"]["END_TIME"] = latest_emoji_msg.created_at.timestamp() + self.param["MAX_TIME"]
-		
+
 
 		# Wait a certain amount of time and then close guessing if it is not already closed
 		await asyncio.sleep(self.param["MAX_TIME"] + 1)
@@ -467,9 +455,13 @@ class EVENT:
 
 			# Send message saying that set has ended
 			if all_contestants_finished == True:
-				await self.param["GAME_CHANNEL"].send("**Set #{}/{} has ended!**\nThe correct answer was **`{}`**.".format(set_number, set_total, self.info["SET_INFO"]["CORRECT_ANSWER"]))
+				await self.param["GAME_CHANNEL"].send(
+					f'**Set #{set_number}/{set_total} has ended!**\nThe correct answer was **`{self.info["SET_INFO"]["CORRECT_ANSWER"]}`**.'
+				)
 			else:
-				await self.param["GAME_CHANNEL"].send("**Set #{}/{} has ended!**\nThe correct answer was **`{}`**.\nAnyone who did not submit a correct answer in time gets a time of **`{}`**.".format(set_number, set_total, self.info["SET_INFO"]["CORRECT_ANSWER"], self.param["MAX_TIME"]))
+				await self.param["GAME_CHANNEL"].send(
+					f'**Set #{set_number}/{set_total} has ended!**\nThe correct answer was **`{self.info["SET_INFO"]["CORRECT_ANSWER"]}`**.\nAnyone who did not submit a correct answer in time gets a time of **`{self.param["MAX_TIME"]}`**.'
+				)
 
 			await asyncio.sleep(5)
 
@@ -482,7 +474,7 @@ class EVENT:
 			else:
 				# That was not the final set, so do not end round and start new set
 				await self.setup_set()
-		
+
 		except Exception:
 			traceback.print_exc()
 
@@ -506,7 +498,7 @@ class EVENT:
 			contestant_obj.current_rank = rank_minus_one + 1
 
 		# Create round CSV
-		csv_filename = "Events/speedcounter_R{}.csv".format(self.info["ROUND_NUMBER"])
+		csv_filename = f'Events/speedcounter_R{self.info["ROUND_NUMBER"]}.csv'
 		with open(csv_filename, 'w', encoding='UTF-8', newline='') as f:
 
 			f.write('\ufeff')
@@ -517,21 +509,20 @@ class EVENT:
 			title_row = ["ID", "NAME", "TOTAL"]
 
 			# Write each individual round title
-			for i in range(self.param["SETS_PER_ROUND"]):
-				title_row.append("SET " + str(i + 1))
-
+			title_row.extend(
+				f"SET {str(i + 1)}" for i in range(self.param["SETS_PER_ROUND"])
+			)
 			writer.writerow(title_row)
 
 			for contestant in sorted_contestant_list:
 
-				contestant_row = []
 				# Get user's contestant object
 				contestant_obj = self.info["CONTESTANTS"][contestant]
-				# Get player information and write it on CSV
-				contestant_row.append(contestant.id) # Adding user's ID
-				contestant_row.append(contestant.name.encode('UTF-8', 'ignore').decode("UTF-8")) # Adding user's name (make sure it only includes UTF-8 characters)
-				contestant_row.append(str(contestant_obj.total_round_time))
-
+				contestant_row = [
+					contestant.id,
+					contestant.name.encode('UTF-8', 'ignore').decode("UTF-8"),
+					str(contestant_obj.total_round_time),
+				]
 				# Go through each time in the contestant's round times
 				for i in range(self.param["SETS_PER_ROUND"]):
 					try:
@@ -543,14 +534,17 @@ class EVENT:
 				writer.writerow(contestant_row)
 
 		# Send leaderboard to administration channel
-		await self.param["ADMIN_CHANNEL"].send(content = "**Speed Counter - Round {} Leaderboard**".format(self.info["ROUND_NUMBER"]), file = discord.File(csv_filename))
+		await self.param["ADMIN_CHANNEL"].send(
+			content=f'**Speed Counter - Round {self.info["ROUND_NUMBER"]} Leaderboard**',
+			file=discord.File(csv_filename),
+		)
 
 		# Find the people in last that are going to be eliminated
 		if self.param["ELIMINATIONS"] > 0:
 			eliminated_contestants = sorted_contestant_list[-1 * self.param["ELIMINATIONS"]:]
 		else:
 			eliminated_contestants = []
-		
+
 		# Create a string of all the contestants for the leaderboard
 		leaderboard_strings = [""]
 
@@ -560,11 +554,7 @@ class EVENT:
 			rank = contestant_obj.current_rank
 			round_time = contestant_obj.total_round_time
 
-			if contestant in eliminated_contestants:
-				lb_symbol = "💀"
-			else:
-				lb_symbol = "✅"
-
+			lb_symbol = "💀" if contestant in eliminated_contestants else "✅"
 			contestant_lb_str = "\n**`[{0}]`** {1} {2} --- **`{3:.2f}`**".format(rank, lb_symbol, contestant.mention, round_time)
 
 			if len(leaderboard_strings[-1] + contestant_lb_str) > 2000:

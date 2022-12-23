@@ -24,12 +24,12 @@ EMOJIS = ["😃", "😭", "😎", "😳"]
 
 async def edit_original_message(interaction, reaction_dict, args_concat):
 	
-	msg_list = ["**"+args_concat+"**\n"]
+	msg_list = [f"**{args_concat}" + "**\n"]
 
-	for user_in_dict in list(reaction_dict.keys()):
-
-		msg_list.append(f"**{user_in_dict.name}**: {reaction_dict[user_in_dict]}")
-
+	msg_list.extend(
+		f"**{user_in_dict.name}**: {reaction_dict[user_in_dict]}"
+		for user_in_dict in list(reaction_dict.keys())
+	)
 	await interaction.response.edit_message(content = "\n".join(msg_list))
 
 	return
@@ -73,7 +73,7 @@ async def MAIN(message, args, level, perms, SERVER):
 
 		# Set button user
 		button_user = interaction.user
-		
+
 		if button_user in list(list_of_reactions.keys()):
 			list_of_reactions[button_user] = EMOJIS[2]
 		elif len(list(list_of_reactions.keys())) < 10:
@@ -85,7 +85,7 @@ async def MAIN(message, args, level, perms, SERVER):
 
 		# Set button user
 		button_user = interaction.user
-		
+
 		if button_user in list(list_of_reactions.keys()):
 			list_of_reactions[button_user] = EMOJIS[3]
 		elif len(list(list_of_reactions.keys())) < 10:
@@ -113,5 +113,7 @@ async def MAIN(message, args, level, perms, SERVER):
 	button_4.callback = flushed_emoji
 	button_view.add_item(button_4)
 
-	msg_to_edit = await message.channel.send("**"+args_concat+"**", view = button_view)
+	msg_to_edit = await message.channel.send(
+		f"**{args_concat}**", view=button_view
+	)
 	return

@@ -14,7 +14,7 @@ def run_bpp_program(code, p_args, author, runner):
 	tag_str = lambda: ' '.join([str(s) for s in tag_code])
 
 	backslashed = False	# Flag for whether to unconditionally escape the next character
-	
+
 	functions = {}	# Dict flattening a tree of all functions to be evaluated
 
 	current = ["", False] # Raw text of what's being parsed right now + whether it's a string
@@ -34,7 +34,7 @@ def run_bpp_program(code, p_args, author, runner):
 				output += char
 			else:
 				current[0] += char
-			
+
 			backslashed = False
 			continue
 
@@ -47,10 +47,10 @@ def run_bpp_program(code, p_args, author, runner):
 
 			if tag_level == 1:
 				try:
-					tag_code = [max([int(k) for k in functions if is_whole(k)]) + 1]
+					tag_code = [max(int(k) for k in functions if is_whole(k)) + 1]
 				except ValueError:
 					tag_code = [0]
-				
+
 				output += "{}"
 
 				found_f = ""
@@ -58,43 +58,43 @@ def run_bpp_program(code, p_args, author, runner):
 				for f_name in FUNCTIONS.keys():
 					try:
 						attempted_f = ''.join(code[ind+1:ind+len(f_name)+2]).upper()
-						if attempted_f == f_name + " ":
+						if attempted_f == f"{f_name} ":
 							found_f = f_name
 							goto = ind + len(f_name) + 2
-						elif attempted_f == f_name + "]":
+						elif attempted_f == f"{f_name}]":
 							found_f = f_name
 							goto = ind + len(f_name) + 1
 					except IndexError: pass
-				
+
 				if found_f == "":
 					end_of_f = min(code.find(" ", ind+1), code.find("]", ind+1))
 					called_f = ''.join(code[ind+1:end_of_f])
 					raise NameError(f"Function {called_f} does not exist")
-				
+
 				functions[tag_str()] = [found_f]
-			
+
 			else:
 				old_tag_code = tag_str()
-				
+
 				k = 1
-				while old_tag_code + f" {k}" in functions.keys():
+				while f"{old_tag_code} {k}" in functions:
 					k += 1
 
-				new_tag_code = old_tag_code + f" {k}"
+				new_tag_code = f"{old_tag_code} {k}"
 
 				found_f = ""
 
 				for f_name in FUNCTIONS.keys():
 					try:
 						attempted_f = ''.join(code[ind+1:ind+len(f_name)+2]).upper()
-						if attempted_f == f_name + " ":
+						if attempted_f == f"{f_name} ":
 							found_f = f_name
 							goto = ind + len(f_name) + 2
-						elif attempted_f == f_name + "]":
+						elif attempted_f == f"{f_name}]":
 							found_f = f_name
 							goto = ind + len(f_name) + 1
 					except IndexError: pass
-				
+
 				if found_f == "":
 					end_of_f = min(code.find(" ", ind+1), code.find("]", ind+1))
 					called_f = ''.join(code[ind+1:end_of_f])
@@ -104,23 +104,22 @@ def run_bpp_program(code, p_args, author, runner):
 				functions[tag_str()].append((new_tag_code,))
 
 				tag_code.append(k)
-			
+
 			normal_case = False
-		
+
 		if char == "]" and not current[1]:
 			if current[0] != "":
 				functions[tag_str()].append(current[0])
 				current = ["", False]
 			tag_level -= 1
 			normal_case = False
-		
-		if char == " ":
-			if not current[1] and tag_level != 0:
-				if current[0] != "":
-					functions[tag_str()].append(current[0])
-					current = ["", False]
-				normal_case = False
-		
+
+		if char == " " and not current[1] and tag_level != 0:
+			if current[0] != "":
+				functions[tag_str()].append(current[0])
+				current = ["", False]
+			normal_case = False
+
 		if char in '"“”':
 			if current[0] == "" and not current[1]:
 				current[1] = True
@@ -128,11 +127,11 @@ def run_bpp_program(code, p_args, author, runner):
 				functions[tag_str()].append(current[0])
 				current = ["", False]
 			normal_case = False
-		
+
 		if normal_case:
 			if tag_level == 0: output += char
 			else: current[0] += char
-		
+
 		tag_code = tag_code[:tag_level]
 		tag_code += [1] * (tag_level - len(tag_code))
 
@@ -148,7 +147,7 @@ def run_bpp_program(code, p_args, author, runner):
 			return type_list.index(type(v))
 		except IndexError:
 			raise TypeError(f"Value {safe_cut(v)} could not be attributed to any valid data type")
-	
+
 	def evaluate_result(k):
 		v = functions[k]
 
@@ -156,7 +155,7 @@ def run_bpp_program(code, p_args, author, runner):
 			k1 = v[0]
 			functions[k] = evaluate_result(k1)
 			return functions[k]
-		
+
 		args = v[1:]
 
 		for i, a in enumerate(args):
@@ -165,7 +164,7 @@ def run_bpp_program(code, p_args, author, runner):
 			if type(a) == tuple:
 				k1 = a[0]
 				functions[k][i+1] = evaluate_result(k1)
-		
+
 		args = v[1:]
 
 		result = FUNCTIONS[v[0]](*args)
@@ -176,7 +175,7 @@ def run_bpp_program(code, p_args, author, runner):
 				if len(str(result[1])) > 100000:
 					raise MemoryError(
 					f"The variable {safe_cut(args[0])} is too large: {safe_cut(result[1])} (limit 100kb)")
-					
+
 				VARIABLES[args[0]] = result[1]
 				result = ""
 
@@ -197,7 +196,7 @@ def run_bpp_program(code, p_args, author, runner):
 				if len(str(result[1])) > 100000:
 					raise MemoryError(
 					f"The global variable {safe_cut(v_name)} is too large: {safe_cut(result[1])} (limit 100kb)")
-				
+
 				if (v_name,) not in db.get_entries("b++2variables", columns=["name"]):
 					v_value = express_array(result[1]) if type(result[1]) == list else result[1]
 
@@ -211,13 +210,13 @@ def run_bpp_program(code, p_args, author, runner):
 					if v_owner != str(author):
 						raise PermissionError(
 						f"Only the author of the {v_name} variable can edit its value ({v_owner})")
-					
+
 					db.edit_entry(
 						"b++2variables",
 						entry={"value": str(result[1]), "type": var_type(result[1])},
 						conditions={"name": v_name})
 					result = ""
-				
+
 			elif result[0] == "gv":
 				v_name = args[0]
 
@@ -235,16 +234,16 @@ def run_bpp_program(code, p_args, author, runner):
 
 			elif result[0] == "id":
 				result = runner.id
-			
+
 			elif result[0] == "aa":
 				result = p_args
-		
+
 		functions[k] = result
 		return result
 
 	for k in base_keys:
 		evaluate_result(k)
-	
+
 	for k in base_keys:
 		if type(functions[k]) == tuple:
 			evaluate_result(k)
