@@ -34,7 +34,7 @@ def runCodeSandbox(code: Tree, user: Union[discord.User, None] = None, arguments
     globals.codebase = Codebase(parsed_code, user, arguments)
     globals.codebase.functions = globals.codebase.functions | functions
 
-    for i, statement in enumerate(parsed_code):
+    for statement in parsed_code:
         globals.codebase.output += "\n"
 
         try:
