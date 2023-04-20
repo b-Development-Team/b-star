@@ -13,7 +13,7 @@ from Config.b_star_interpreter.globals import debug
 
 # Returns true if the value is not "None" or "Infinite"
 def isUniqueValue(value: any):
-    return False if value is (None or math.inf) else True
+    return value is not (None or math.inf)
 
 
 class Function:

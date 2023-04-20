@@ -32,16 +32,13 @@ def runCodeSandbox(code: Tree, user: discord.User | None = None, arguments: list
     globals.codebase = Codebase(parsed_code, user, arguments)
     globals.codebase.functions = globals.codebase.functions | functions
 
-    for i, statement in enumerate(parsed_code):
+    for statement in parsed_code:
         globals.codebase.output += "\n"
 
         try:
             result = readLine(statement)
-            if result is not None:
-                if not result:
-                    globals.codebase.output += "\n"
-        # except BStarProgramDefinedException as error:
-        #     return f"{error}"
+            if result is not None and not result:
+                globals.codebase.output += "\n"
         except Exception as error:
             return returnError(code, statement, error)
 
@@ -60,13 +57,10 @@ def readLine(statement):
     else:
         result = Expression(statement, globals.codebase)
 
-    # this prints the result code if you need it
-    # print(result)
-    if result is not None:
-        globals.codebase.output += str(result)
-        return str(result)
-    else:
+    if result is None:
         return None
+    globals.codebase.output += str(result)
+    return str(result)
 
 
 # def parseArguments(args: List[str]):

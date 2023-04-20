@@ -8,31 +8,27 @@ from Config._db import Database
 def global_func(use: str, name: str, value: any):
     db = Database()
 
-    if globals.codebase.global_limit < 50:
-        if use == "DEFINE":
-            check_filesize(value)
-            if globalExists(db, name):
-                if isOwnerGlobal(db, name, str(globals.codebase.author)): # author is an id #
-                    editGlobal(db, name, value)
-                    globals.codebase.global_limit += 1
-
-                else:
-                    raise PermissionError(f"You cannot edit global '**{name}**' as you are not the owner!")
-            else:
-                createGlobal(db, name, value)
-                globals.codebase.global_limit += 1
-
-        elif use == "VAR":
-            if globalExists(db, name):
-                possible_global = getGlobal(db, name)
-                globals.codebase.global_limit += 1
-
-                return to_type(possible_global[0], int(possible_global[1]))
-            else:
-                raise ValueError(f"Global '{name}' does not exist!")
-    else:
+    if globals.codebase.global_limit >= 50:
         raise ValueError(
             "You have reached the __temporary__ global read/write limit of 50! Please make sure you're only using GLOBAL blocks when absolutely necessary.")
+    if use == "DEFINE":
+        check_filesize(value)
+        if globalExists(db, name):
+            if not isOwnerGlobal(db, name, str(globals.codebase.author)):
+                raise PermissionError(f"You cannot edit global '**{name}**' as you are not the owner!")
+            editGlobal(db, name, value)
+        else:
+            createGlobal(db, name, value)
+        globals.codebase.global_limit += 1
+
+    elif use == "VAR":
+        if globalExists(db, name):
+            possible_global = getGlobal(db, name)
+            globals.codebase.global_limit += 1
+
+            return to_type(possible_global[0], int(possible_global[1]))
+        else:
+            raise ValueError(f"Global '{name}' does not exist!")
 
 
 # TODO: Remove this duplicate function

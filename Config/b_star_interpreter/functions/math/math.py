@@ -8,17 +8,17 @@ from Config.b_star_interpreter.functions.math.sub import sub
 
 def math_func(number: float, operator: str, by: float):
     operator = operator.strip()
-    if operator == "+":
+    if operator == "%":
+        return mod(number, by)
+    elif operator == "*":
+        return mul(number, by)
+    elif operator == "+":
         return add(number, by)
     elif operator == "-":
         return sub(number, by)
     elif operator == "/":
         return div(number, by)
-    elif operator == "*":
-        return mul(number, by)
     elif operator == "^":
         return pow_func(number, by)
-    elif operator == "%":
-        return mod(number, by)
     else:
-        raise Exception("unknown operator: " + operator)
+        raise Exception(f"unknown operator: {operator}")

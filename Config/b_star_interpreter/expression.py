@@ -86,10 +86,5 @@ def Expression(block: bstarparser.Property, codebase):
 
 
 def findFunction(name: str, codebase):  # -> Union[Callable[[List, Codebase], None], List[str]]:
-    # This tries to find a user-made function first, then tries the built-in ones.
-    functionWanted = globals.codebase.functions[name]
-    # if functionWanted is None:
-    #     functionWanted = Commands.src.interpreter.tempFunctionsFile.functions.get(name)
-
-    return functionWanted
+    return globals.codebase.functions[name]
 

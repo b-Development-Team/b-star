@@ -9,6 +9,5 @@ def if_func(compare: any, true: any, false: any):
 
     if Expression(compare, globals.codebase):
         return Expression(true, globals.codebase)
-    else:
-        if false_arg:
-            return Expression(false, globals.codebase)
+    if false_arg:
+        return Expression(false, globals.codebase)

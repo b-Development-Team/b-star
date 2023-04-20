@@ -13,10 +13,9 @@ def import_func(name: str):
 
     if tag is None:
         raise Exception(f"Tag **{name}** not found!")
-    else:
-        # Add it to the codebase functions
-        code = parseCode(tag[1])
+    # Add it to the codebase functions
+    code = parseCode(tag[1])
 
-        # Run each line (effectively importing it)
-        for line in code.children:
-            Expression(line, globals.codebase)
+    # Run each line (effectively importing it)
+    for line in code.children:
+        Expression(line, globals.codebase)
