@@ -9,9 +9,13 @@ def HELP(PREFIX):
 		"MAIN": "Easy mass-pfp-gathering command for staff use",
 		"FORMAT": "",
 		"CHANNEL": 0,
-		"USAGE": f"""W.I.P.
-		""".replace("\n", "").replace("\t", ""),
-		"CATEGORY" : "Fun"
+		"USAGE": """W.I.P.
+		""".replace(
+			"\n", ""
+		).replace(
+			"\t", ""
+		),
+		"CATEGORY": "Fun",
 	}
 
 PERMS = 2 # Staff

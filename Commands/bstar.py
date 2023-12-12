@@ -19,7 +19,7 @@ def HELP(PREFIX):
 		"MAIN": "Allows you to write short tags and/or programs",
 		"FORMAT": "[subcommand]",
 		"CHANNEL": 0,
-		"USAGE": f"""Using `tc/bstar run [code]` allows you to run `[code]` as B* source code. Using `tc/bstar info 
+		"USAGE": """Using `tc/bstar run [code]` allows you to run `[code]` as B* source code. Using `tc/bstar info 
 		(page)` displays a paged list of all B* programs by use count, while using `tc/bstar info (program)` 
 		displays information and the source code of a specific program. `tc/bstar create [program] [code]` can be used 
 		to save code into a specific program name, which can be edited by its creator with `tc/bstar edit [program] 
@@ -27,8 +27,12 @@ def HELP(PREFIX):
 		saved program.^n^n
 		The full documentation for all B* program functionality is displayed in this document:^n
 		https://github.com/b-Development-Team/b-star/wiki
-		""".replace("\n", "").replace("\t", "").replace("^n", "\n"),
-		"CATEGORY": "Fun"
+		""".replace(
+			"\n", ""
+		)
+		.replace("\t", "")
+		.replace("^n", "\n"),
+		"CATEGORY": "Fun",
 	}
 
 
@@ -40,25 +44,22 @@ setupFunctions()
 
 
 async def accept_file_or_message(message):
-	if len(message.attachments) > 0:
-		attachment = message.attachments[0]
-		try:
-			await attachment.save(f"Config/{message.id}.txt")
-		except Exception:
-			raise "Include a program to save!"
-		file = open(f"Config/{message.id}.txt", "r", encoding="utf-8").read()
-		os.remove(f"Config/{message.id}.txt")
-		if attachment.size >= 150_000:
-			raise "File is too large! (150KB MAX)"
-		else:
-			return file
-	else:
+	if len(message.attachments) <= 0:
 		return " ".join(message.content.split(" ")[2:])
+	attachment = message.attachments[0]
+	try:
+		await attachment.save(f"Config/{message.id}.txt")
+	except Exception:
+		raise "Include a program to save!"
+	file = open(f"Config/{message.id}.txt", "r", encoding="utf-8").read()
+	os.remove(f"Config/{message.id}.txt")
+	if attachment.size >= 150_000:
+		raise "File is too large! (150KB MAX)"
+	else:
+		return file
 
 
 async def MAIN(message, args, level, perms, SERVER, LOGIN):
-	bs_version = 1  # 0 = b++, 1 = b* (1.0)
-
 	if level == 1:
 		await message.channel.send("Include a subcommand!")
 		return
@@ -127,6 +128,8 @@ async def MAIN(message, args, level, perms, SERVER, LOGIN):
 		if (tag_name,) in db.get_entries("bsprograms", columns=["name"]):
 			await message.channel.send("There's already a program with that name!")
 			return
+
+		bs_version = 1  # 0 = b++, 1 = b* (1.0)
 
 		# db.add_entry("bsprograms", [0, int(time.time()), 0, tag_name, program, message.author.id])
 		db.add_entry("bsprograms", [tag_name, program, message.author.id, 0, int(time.time()), 0, 0, bs_version])
@@ -228,7 +231,7 @@ async def MAIN(message, args, level, perms, SERVER, LOGIN):
 			msg += f"Last used on {last_used} `({u_d} ago)`\n"
 
 		if len(program[1]) > 1700:
-			msg += f"The program is too long to be included in the message, so it's in the file below:"
+			msg += "The program is too long to be included in the message, so it's in the file below:"
 			open(f'program_{program[0]}.txt', 'w', encoding="utf-8").write(program[1])
 			await message.channel.send(msg, file=discord.File(f'program_{program[0]}.txt'))
 			os.remove(f'program_{program[0]}.txt')
@@ -259,7 +262,9 @@ async def MAIN(message, args, level, perms, SERVER, LOGIN):
 
 		ind = [x[0] for x in tag_list].index(tag_name)
 		if tag_list[ind][1] != str(message.author.id) and perms < 2:
-			await message.channel.send(f"You can only edit a program if you created it or if you're a staff member!")
+			await message.channel.send(
+				"You can only edit a program if you created it or if you're a staff member!"
+			)
 			return
 
 		if level > 3:
@@ -309,7 +314,9 @@ async def MAIN(message, args, level, perms, SERVER, LOGIN):
 
 		ind = [x[0] for x in tag_list].index(tag_name)
 		if tag_list[ind][1] != str(message.author.id) and perms < 2:
-			await message.channel.send(f"You can only edit a program if you created it or if you're a staff member!")
+			await message.channel.send(
+				"You can only edit a program if you created it or if you're a staff member!"
+			)
 			return
 
 		db.remove_entry("bsprograms", conditions={"name": tag_name})

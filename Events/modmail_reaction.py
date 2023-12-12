@@ -23,8 +23,8 @@ class EVENT:
 	# Function that runs on each message
 	async def on_message(self, message):
 
-		if self.param["MODMAIL_CATEGORY"] == None: return # Do not run if modmail category does not exist
-		if message.channel == None: return # Do not run if message was not sent in channel
+		if self.param["MODMAIL_CATEGORY"] is None: return # Do not run if modmail category does not exist
+		if message.channel is None: return # Do not run if message was not sent in channel
 
 		if message.channel.category_id == self.param["MODMAIL_CATEGORY"].id:
 
@@ -49,10 +49,10 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return

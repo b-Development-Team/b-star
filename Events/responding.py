@@ -49,7 +49,7 @@ CHARACTER_CAP = 200
 async def get_positive_integer(user, channel):
 	
 	admin_input = None
-	while admin_input == None:
+	while admin_input is None:
 
 		msg = await BRAIN.wait_for('message', check=lambda m: (m.author == user and m.channel == channel))
 
@@ -119,13 +119,13 @@ class EVENT:
 		# Set up all players in a role that is in ROLES_IN_RESPONDING
 		for role in self.param["ROLES_IN_RESPONDING"]:
 			for member in role.members:
-				if not member in self.info["USERS_RESPONDING"]:
+				if member not in self.info["USERS_RESPONDING"]:
 					# If user not found in user list, add them to the to the list
 					self.info["USERS_RESPONDING"].append(member)
 
 		# Set up all players in the USERS_IN_RESPONDING list
 		for member in self.param["USERS_IN_RESPONDING"]:
-			if not member in self.info["USERS_RESPONDING"]:
+			if member not in self.info["USERS_RESPONDING"]:
 				# If user not found in user list, add them to the to the list
 				self.info["USERS_RESPONDING"].append(member)
 
@@ -157,8 +157,8 @@ class EVENT:
 			self.info["RESPONDING_END_TIME"] = self.param["RESPOND_LENGTH"]
 
 		# Define the two timestamp strings that will be displayed to users
-		deadline_time_string = "<t:{}:t>".format(self.info["RESPONDING_END_TIME"])
-		deadline_relative_string = "<t:{}:R>".format(self.info["RESPONDING_END_TIME"])
+		deadline_time_string = f'<t:{self.info["RESPONDING_END_TIME"]}:t>'
+		deadline_relative_string = f'<t:{self.info["RESPONDING_END_TIME"]}:R>'
 
 		default_responses = self.param["DEFAULT_RESPONSE_AMOUNT"]
 
@@ -171,7 +171,7 @@ class EVENT:
 				self.info["TSV_TITLE_ROWS"] += technical_object.extra_tsv_title_rows
 				if hasattr(technical_object, "responding_start"):
 					technical_object.responding_start()
-				
+
 			except Exception:
 				try:
 					traceback.print_exc()
@@ -186,7 +186,7 @@ class EVENT:
 		if default_responses > 1:
 			announcement_str += f"Everyone gets to send in **{default_responses}** responses!\n"
 		# If some players have a special amount of responses, tell them that
-		if len(list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys())) != 0:
+		if list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys()):
 			# Iterate through the amount of special responses
 			for respamount in list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys()):
 				contestants = self.param["SPECIAL_RESPONSE_AMOUNT"][respamount]
@@ -236,7 +236,7 @@ class EVENT:
 
 			msg = await BRAIN.wait_for('message', check=lambda m: (m.author in self.param["ADMIN_ROLE"].members and m.channel == self.param["ADMIN_CHANNEL"]))
 			# Check if alphanumeric or underscore
-			if all([character in list(ALPHANUM_UNDERSCORE) for character in msg.content]):
+			if all(character in list(ALPHANUM_UNDERSCORE) for character in msg.content):
 				# Break out of loop
 				file_name = msg.content
 				break
@@ -245,7 +245,7 @@ class EVENT:
 				await self.param["ADMIN_CHANNEL"].send("Invalid input. Please try again.")
 
 		# Creating the Response Information TSV file
-		resp_info_file_name = "Events/" + file_name + "_INFO.tsv"
+		resp_info_file_name = f"Events/{file_name}_INFO.tsv"
 		# Write to TSV
 		with open(resp_info_file_name, 'w', encoding="UTF-8", newline='') as f:
 
@@ -264,16 +264,17 @@ class EVENT:
 				response_list = self.info["RESPONSES"][user]
 				for response in response_list:
 
-					if response == None: continue
+					if response is None: continue
 
 					# Add each response to the TSV
 					userobj = BRAIN.get_user(user.id)
 
-					resp_tsv_list = []
-					resp_tsv_list.append(str(user.id)) # User's ID
-					resp_tsv_list.append(userobj.display_name.encode('UTF-8', 'ignore').decode("UTF-8")) # User's username, which has all non UTF-8 characters filtered out
-					resp_tsv_list.append(response[0]) # The user's actual response
-					resp_tsv_list.append(str(round(response[2], 2))) # The timestamp of the user's response - when it was sent
+					resp_tsv_list = [
+						str(user.id),
+						userobj.display_name.encode('UTF-8', 'ignore').decode("UTF-8"),
+						response[0],
+						str(round(response[2], 2)),
+					]
 					resp_tsv_list.append(str(round(response[2] - self.info["RESPONDING_START_TIME"], 2))) # The relative timestamp of the user's response - how long ago they sent a response
 					# If any special information was passed onto the response
 					if len(response) > 3:
@@ -283,7 +284,7 @@ class EVENT:
 					writer.writerow(resp_tsv_list)
 
 		# Creating the Voting Generation TSV file
-		voting_gen_file_name = "Events/" + file_name + "_VOTING.tsv"
+		voting_gen_file_name = f"Events/{file_name}_VOTING.tsv"
 		# Write to TSV
 		with open(voting_gen_file_name, 'w', encoding="UTF-8", newline='') as f: 
 
@@ -302,7 +303,7 @@ class EVENT:
 				response_list = self.info["RESPONSES"][user]
 				for response in response_list:
 
-					if response == None: continue
+					if response is None: continue
 
 					response_id += 1
 
@@ -310,11 +311,14 @@ class EVENT:
 					userobj = BRAIN.get_user(user.id)
 
 					# Add each response to the TSV
-					resp_tsv_list = []
-					resp_tsv_list.append(str(response_id)) # The number of the response
-					resp_tsv_list.append(userobj.display_name.encode('UTF-8', 'ignore').decode("UTF-8")) # User's username, which has all non UTF-8 characters filtered out
-					resp_tsv_list.append(response[0]) # The user's actual response
-					resp_tsv_list.append(str(response[1])) # Whether or not the user's response was valid or not (in limits), either True or False
+					resp_tsv_list = [str(response_id)]
+					resp_tsv_list.extend(
+						(
+							userobj.display_name.encode('UTF-8', 'ignore').decode("UTF-8"),
+							response[0],
+							str(response[1]),
+						)
+					)
 					# Write to TSV
 					writer.writerow(resp_tsv_list)
 
@@ -327,38 +331,38 @@ class EVENT:
 	async def on_two_second(self):
 
 		# Check if responding is open
-		if self.info["RESPONDING_OPEN"] == True:
+		if self.info["RESPONDING_OPEN"] != True:
+			return
+		# Get current time
+		current_timestamp = time.time()
 
-			# Get current time
-			current_timestamp = time.time()
+		# Check if the deadline has passed - only run this once
+		if current_timestamp > self.info["RESPONDING_END_TIME"] and self.info["DEADLINE_PASSED"] == False:
 
-			# Check if the deadline has passed - only run this once
-			if current_timestamp > self.info["RESPONDING_END_TIME"] and self.info["DEADLINE_PASSED"] == False:
+			# Make sure this only runs once
+			self.info["DEADLINE_PASSED"] = True
 
-				# Make sure this only runs once
-				self.info["DEADLINE_PASSED"] = True
+			# Check which people have not sent responses yet - check how many None's are in a player's list
+			# Dictionary: key is the amount of responses they have to send, value is a list of players who need to send that amount of responses
+			players_to_respond = {}
+			players_to_respond_list = []
 
-				# Check which people have not sent responses yet - check how many None's are in a player's list
-				# Dictionary: key is the amount of responses they have to send, value is a list of players who need to send that amount of responses
-				players_to_respond = {}
-				players_to_respond_list = []
+			for user in list(self.info["RESPONSES"].keys()):
+				response_list = self.info["RESPONSES"][user]
+				if None in response_list:
+					# Record how many responses the player has not sent
+					responses_left = response_list.count(None)
+					# If the amount of responses left already exists as a key in the players to respond dict, add the player to the list
+					if responses_left in list(players_to_respond.keys()):
+						players_to_respond[responses_left].append(user)
+					# If the amount of responses left does not exist as a key in the players to respond dict, make it a key 
+					else:
+						players_to_respond[responses_left] = [user]
+					# Append them to the players_to_respond_list (to be used later when sending a message in the admin channel)
+					players_to_respond_list.append(user)
 
-				for user in list(self.info["RESPONSES"].keys()):
-					response_list = self.info["RESPONSES"][user]
-					if None in response_list:
-						# Record how many responses the player has not sent
-						responses_left = response_list.count(None)
-						# If the amount of responses left already exists as a key in the players to respond dict, add the player to the list
-						if responses_left in list(players_to_respond.keys()):
-							players_to_respond[responses_left].append(user)
-						# If the amount of responses left does not exist as a key in the players to respond dict, make it a key 
-						else:
-							players_to_respond[responses_left] = [user]
-						# Append them to the players_to_respond_list (to be used later when sending a message in the admin channel)
-						players_to_respond_list.append(user)
-
-				# Turn the players to respond dict into a string that can be sent with the deadline message
-				"""still_to_respond_strings = []
+			# Turn the players to respond dict into a string that can be sent with the deadline message
+			"""still_to_respond_strings = []
 				for responses_left in list(players_to_respond.keys()):
 
 					players_with_amount = players_to_respond[responses_left]
@@ -376,58 +380,58 @@ class EVENT:
 
 				# Put together all the strings in the still_to_respond_strings list
 				still_to_respond_str = "\n".join(still_to_respond_strings)"""
-				
-				# Send a message saying deadline passed
-				#if len(still_to_respond_strings) > 0:
-					#deadline_passed_str = f"__**The deadline has passed!**__\n\n{still_to_respond_str}\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
-				#else:
-					#deadline_passed_str = f"__**The deadline has passed!**__\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
 
-				deadline_passed_str = f"__**The deadline has passed!**__\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
+			# Send a message saying deadline passed
+			#if len(still_to_respond_strings) > 0:
+				#deadline_passed_str = f"__**The deadline has passed!**__\n\n{still_to_respond_str}\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
+			#else:
+				#deadline_passed_str = f"__**The deadline has passed!**__\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
 
-				# Send a message in the admin channel about the responding period after the deadline
-				# Check what users have not sent responses yet
-				players_left_to_respond_strings = ["**The deadline has passed!**\n\nResponses received before the deadline: **{}/{}**\n__Users left to respond:__]".format(self.info["RESPONSES_RECEIVED"], self.info["TOTAL_RESPONSES"])]
-				for user in players_to_respond_list:
-					# Check how many responses they have submitted and how many they have in total
-					user_total_responses = len(self.info["RESPONSES"][user])
-					user_responses_submitted = user_total_responses - self.info["RESPONSES"][user].count(None)
+			deadline_passed_str = f"__**The deadline has passed!**__\n\nYou are still able to respond and edit responses. If you are still responding, please let anyone running the event know. The grace period will close soon."
 
-					player_string = f"{user.mention} ({user_responses_submitted}/{user_total_responses})\n"	
+			# Send a message in the admin channel about the responding period after the deadline
+			# Check what users have not sent responses yet
+			players_left_to_respond_strings = ["**The deadline has passed!**\n\nResponses received before the deadline: **{}/{}**\n__Users left to respond:__]".format(self.info["RESPONSES_RECEIVED"], self.info["TOTAL_RESPONSES"])]
+			for user in players_to_respond_list:
+				# Check how many responses they have submitted and how many they have in total
+				user_total_responses = len(self.info["RESPONSES"][user])
+				user_responses_submitted = user_total_responses - self.info["RESPONSES"][user].count(None)
 
-					if len(players_left_to_respond_strings[-1]) + len(player_string) > 2000:
-						players_left_to_respond_strings.append("")
+				player_string = f"{user.mention} ({user_responses_submitted}/{user_total_responses})\n"	
 
-					players_left_to_respond_strings[-1] += player_string		
+				if len(players_left_to_respond_strings[-1]) + len(player_string) > 2000:
+					players_left_to_respond_strings.append("")
 
-				await self.param["ANNOUNCE_CHANNEL"].send(deadline_passed_str)
+				players_left_to_respond_strings[-1] += player_string		
 
-				# Create button for closing responding
-				button_view = View(timeout = None)
-				########################################################
-				async def responding_end_pressed(interaction):
+			await self.param["ANNOUNCE_CHANNEL"].send(deadline_passed_str)
 
-					if interaction.user not in self.param["ADMIN_ROLE"].members:
-						await interaction.response.defer()
-						return
+			# Create button for closing responding
+			button_view = View(timeout = None)
+			########################################################
+			async def responding_end_pressed(interaction):
 
-					# END RESPONDING PERIOD
-					await interaction.response.edit_message(content = "**Responding has been ended!**", view = None)
+				if interaction.user not in self.param["ADMIN_ROLE"].members:
+					await interaction.response.defer()
+					return
 
-					# Start game
-					await self.end_responding()
+				# END RESPONDING PERIOD
+				await interaction.response.edit_message(content = "**Responding has been ended!**", view = None)
 
-				# Creating button objects
-				end_responding_button = Button(style = discord.ButtonStyle.blurple, label = "End responding")
-				end_responding_button.callback = responding_end_pressed				
-				button_view.add_item(end_responding_button)
+				# Start game
+				await self.end_responding()
 
-				# Message has been split into chunks
-				for string in players_left_to_respond_strings:
-					await self.param["ADMIN_CHANNEL"].send(string)
+			# Creating button objects
+			end_responding_button = Button(style = discord.ButtonStyle.blurple, label = "End responding")
+			end_responding_button.callback = responding_end_pressed				
+			button_view.add_item(end_responding_button)
 
-				# Sending message
-				await self.param["ADMIN_CHANNEL"].send(content = "Any further responses sent after the deadline will be sent here. Press the button to end responding.", view = button_view)
+			# Message has been split into chunks
+			for string in players_left_to_respond_strings:
+				await self.param["ADMIN_CHANNEL"].send(string)
+
+			# Sending message
+			await self.param["ADMIN_CHANNEL"].send(content = "Any further responses sent after the deadline will be sent here. Press the button to end responding.", view = button_view)
 
 	# Function that runs on each message
 	async def on_message(self, message):
@@ -447,8 +451,6 @@ class EVENT:
 				except Exception as e:
 					print(e)
 
-		###############################################################################
-		# Responding is open, anyone can respond or edit as long as they are allowed to
 		elif self.info["RESPONDING_OPEN"] == True:
 
 			# Check if in DMs or not
@@ -461,8 +463,6 @@ class EVENT:
 							await technical.on_player_message(message, user)
 						except Exception as e:
 							print(f"[ERROR - RESPONDING] Exception in on_message portion of technical {technical.name}: {e}")
-							pass
-				
 				# Is in DMs, split the content of the message
 				message_words = message.content.split(" ")
 
@@ -477,7 +477,7 @@ class EVENT:
 
 					# Check if user has already submitted all their responses
 					response_list = self.info["RESPONSES"][user]
-					if not None in response_list:
+					if None not in response_list:
 						if len(response_list) >= 2:
 							await channel.send(f"❌ You've already sent your responses! If you want to edit, use `{EVENT_PREFIX}edit` followed by the number of the response you want to edit, followed by your new response.")
 						else:
@@ -505,7 +505,7 @@ class EVENT:
 
 						# Record response by replacing the earliest NoneType inside the user's response list
 						for i, responseobj in enumerate(self.info["RESPONSES"][user]):
-							if responseobj == None:
+							if responseobj is None:
 								# Recording response information - response, whether or not it is valid, or the timestamp of the message and some other response info if given
 								self.info["RESPONSES"][user][i] = [response, response_is_valid, message.created_at.timestamp()] + misc_response_info
 								break
@@ -516,10 +516,13 @@ class EVENT:
 						# Send response recorded message if the user only has one response
 						if len(self.info["RESPONSES"][user]) == 1:
 							await message.reply(content = f"☑️ **Response recorded!** ☑️\n\nYour response was recorded as: `{response}`\n{response_info_string}\n\nTo edit your response, use the command `{EVENT_PREFIX}edit` followed by your new response.", mention_author=False)
-						# Send response recorded message if the user has two or more responses
 						else:
 							# Add a list of the user's responses
-							user_response_strings = ["**`{}:`**`{}`".format(num + 1, self.info["RESPONSES"][user][num][0]) for num in range(len(self.info["RESPONSES"][user])) if self.info["RESPONSES"][user][num] != None]
+							user_response_strings = [
+								f'**`{num + 1}:`**`{self.info["RESPONSES"][user][num][0]}`'
+								for num in range(len(self.info["RESPONSES"][user]))
+								if self.info["RESPONSES"][user][num] != None
+							]
 
 							# If user still has more responses to send in, tell them to do so
 							# Find the amount of None's in the user's response list
@@ -552,7 +555,7 @@ class EVENT:
 							await self.param["ADMIN_CHANNEL"].send(textwrap.dedent("""
 								{} **({}/{})** sent in a response after the deadline: `{}`
 								The total response count is now **{}/{}**.""".format(user.mention, user_responses_submitted, user_total_responses, response, self.info["RESPONSES_RECEIVED"], self.info["TOTAL_RESPONSES"])))
-						
+
 					except Exception as e:
 						print(e)
 						await channel.send("❌ An error occured while trying to record your response.")
@@ -572,13 +575,12 @@ class EVENT:
 					if len(self.info["RESPONSES"][user]) == 1:
 
 						# Check if user has a response in this slot
-						if self.info["RESPONSES"][user][0] == None:
+						if self.info["RESPONSES"][user][0] is None:
 							await channel.send(f"❌ You haven't submitted a response yet! To submit your response, use `{EVENT_PREFIX}respond` followed by your response.")
 							return
 
 						response_to_edit = 1
 
-					# User has more than one response, therefore their second word in their command will be an integer
 					else:
 
 						# Check if user sent the number of the response they want to edit
@@ -595,7 +597,7 @@ class EVENT:
 								return
 
 							# Check if user has a response in this slot
-							if self.info["RESPONSES"][user][response_to_edit - 1] == None:
+							if self.info["RESPONSES"][user][response_to_edit - 1] is None:
 								await channel.send("❌ No response currently in this number slot!")
 								return
 
@@ -607,10 +609,10 @@ class EVENT:
 					if len(message_words) == 0:
 						await channel.send(f"❌ You need to send your response after the `{EVENT_PREFIX}edit [response number]` command!")
 						return
-						
+
 					# Check response for validity and send response
 					try:
-				
+								
 						response = " ".join(message_words)
 
 						# Do actions to response to ensure validity of it
@@ -628,10 +630,13 @@ class EVENT:
 						# Send response recorded message if the user only has one response
 						if len(self.info["RESPONSES"][user]) == 1:
 							await message.reply(content = f"☑️ **Response edited!** ☑️\n\nYour new response is recorded as: `{response}`\n{response_info_string}\n\nTo edit your response again, use the command `{EVENT_PREFIX}edit` followed by your new response.", mention_author=False)
-						# Send response recorded message if the user has two or more responses
 						else:
 							# Add a list of the user's responses
-							user_response_strings = ["**`{}:`**`{}`".format(num + 1, self.info["RESPONSES"][user][num][0]) for num in range(len(self.info["RESPONSES"][user])) if self.info["RESPONSES"][user][num] != None]
+							user_response_strings = [
+								f'**`{num + 1}:`**`{self.info["RESPONSES"][user][num][0]}`'
+								for num in range(len(self.info["RESPONSES"][user]))
+								if self.info["RESPONSES"][user][num] != None
+							]
 
 							# If user still has more responses to send in, tell them to do so
 							# Find the amount of None's in the user's response list
@@ -654,7 +659,7 @@ class EVENT:
 								
 								Your current responses are:
 								""") + user_resp_string, mention_author=False)
-						
+
 					except Exception as e:
 						print(e)
 						await channel.send("❌ An error occured while trying to record your edit.")
@@ -668,8 +673,6 @@ class EVENT:
 
 		# Count the amount of words and characters in the response
 		wc = word_count(response)
-		character_count = len(response)
-
 		word_limit = self.param["WORD_LIMIT"]
 		character_limit = self.param["CHARACTER_LIMIT"]
 
@@ -691,6 +694,8 @@ class EVENT:
 
 		# Check if a character limit exists
 		if character_limit > 0:
+			character_count = len(response)
+
 			# Check if response is under that character limit
 			if character_limit >= character_count: 
 				info_list.append("Your response follows the character limit!")
@@ -702,11 +707,9 @@ class EVENT:
 		for technical in self.info["TECHNICALS"]:
 			if hasattr(technical, "on_response_submission"):
 				try:
-					response, response_is_valid, misc_response_info, info_list = technical.on_response_submission(user, response, response_is_valid, misc_response_info, info_list) 
+					response, response_is_valid, misc_response_info, info_list = technical.on_response_submission(user, response, response_is_valid, misc_response_info, info_list)
 				except Exception as e:
 					print(f"[ERROR - RESPONDING] Exception in response_info portion of technical {technical.name}: {e}")
-					pass
-
 		return response_is_valid, misc_response_info, "\n".join(info_list)
 
 	# Function that checks response's validity
@@ -720,13 +723,13 @@ class EVENT:
 
 		# Check if user is over the character cap
 		if len(response) > CHARACTER_CAP:
-			
+
 			await channel.send(f"❌ Your response has gone over the character cap of {CHARACTER_CAP}!")
 			return False
 
 		# Convert response's quotes to curly quotes
 		try:
-			for i in range(math.floor(response.count('"') / 2)):
+			for _ in range(math.floor(response.count('"') / 2)):
 				response = response.replace('"', '“', 1)
 				response = response.replace('"', '”', 1)
 
@@ -734,7 +737,7 @@ class EVENT:
 			print("\n[ERROR] Exception whilst converting response to curly quotes")
 			print(e)
 			print("")
-		
+
 		return response
 
 		# Allow admins to modify parameters from main modification message
@@ -743,7 +746,7 @@ class EVENT:
 
 		# Create embed
 		admin_embed = discord.Embed(title="Responding - Modify Parameters", description="Select a parameter to change in the dropdown menu, or select `Confirm` to confirm the parameters.", color=0x31d8b1)
-		
+
 		# Add fields listing the word/character limits
 		admin_embed.add_field(name="🧪 Testing event", value=str(self.param["TESTING"]), inline=False)
 
@@ -785,11 +788,11 @@ class EVENT:
 		admin_embed.add_field(name="🗳️ Amount of responses", value=str(self.param["DEFAULT_RESPONSE_AMOUNT"]), inline=False)
 
 		# Add fields listing the extra amount of responses if there are any
-		if len(list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys())) > 0:
+		if list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys()):
 
 			value_str = ""
 			for amount in list(self.param["SPECIAL_RESPONSE_AMOUNT"].keys()):
-				
+
 				value_str += f"**{amount}:** " + "".join(x.mention for x in self.param["SPECIAL_RESPONSE_AMOUNT"][amount]) + "\n"
 
 			admin_embed.add_field(name="🗳️ Extra responses", value=value_str, inline = False)
@@ -858,7 +861,7 @@ class EVENT:
 							await self.param["ADMIN_CHANNEL"].send("Word limit disabled!")
 						else:
 							await self.param["ADMIN_CHANNEL"].send(f"Word limit set to {admin_input}!")
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "characterlimit":
@@ -873,7 +876,7 @@ class EVENT:
 							await self.param["ADMIN_CHANNEL"].send("Character limit disabled!")
 						else:
 							await self.param["ADMIN_CHANNEL"].send(f"Character limit set to {admin_input}!")
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "responseamount":
@@ -885,7 +888,7 @@ class EVENT:
 						# Change word limit to user's input
 						self.param["DEFAULT_RESPONSE_AMOUNT"] = admin_input
 						await self.param["ADMIN_CHANNEL"].send(f"Default amount of responses set to {admin_input}!")
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "deadline":
@@ -907,7 +910,7 @@ class EVENT:
 								await self.param["ADMIN_CHANNEL"].send(f"Responding period length set to {minutes} minutes!")
 							else:
 								await self.param["ADMIN_CHANNEL"].send(f"Responding period length set to {minutes} minutes and {seconds} seconds!")
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "deadline":
@@ -929,7 +932,7 @@ class EVENT:
 								await self.param["ADMIN_CHANNEL"].send(f"Responding period length set to {minutes} minutes!")
 							else:
 								await self.param["ADMIN_CHANNEL"].send(f"Responding period length set to {minutes} minutes and {seconds} seconds!")
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "technicals":
@@ -939,7 +942,11 @@ class EVENT:
 					while True:
 
 						active_technicals = self.param["TECHNICALS"]
-						non_active_technicals = [tech for tech in list(IMPORTED_TECHNICALS.keys()) if not tech in active_technicals]
+						non_active_technicals = [
+							tech
+							for tech in list(IMPORTED_TECHNICALS.keys())
+							if tech not in active_technicals
+						]
 
 						await self.param["ADMIN_CHANNEL"].send(textwrap.dedent(f"""
 							:white_check_mark: **Active technicals:** {", ".join(active_technicals)}
@@ -974,10 +981,12 @@ class EVENT:
 							# Toggling a certain technical
 							message_words = input_message.content.split()
 							if len(message_words) == 1:
-								await self.param["ADMIN_CHANNEL"].send(f"You must provide a technical to toggle!")
+								await self.param["ADMIN_CHANNEL"].send(
+									"You must provide a technical to toggle!"
+								)
 							else:
 								technical = message_words[1].upper()
-								
+
 								if technical in IMPORTED_TECHNICALS:
 
 									if technical in active_technicals:
@@ -989,7 +998,7 @@ class EVENT:
 										# Remove the technical from the technicals list
 										self.param["TECHNICALS"].append(technical)
 										await self.param["ADMIN_CHANNEL"].send(f"Added **{technical}** technical to the active technicals list!")
-								
+
 								else:
 									await self.param["ADMIN_CHANNEL"].send("This technical is not in the technicals list!")
 
@@ -997,7 +1006,8 @@ class EVENT:
 
 							if len(input_message.attachments) == 0:
 								await input_message.channel.send(
-								f"**You must send a file containing the technicals!**")
+									"**You must send a file containing the technicals!**"
+								)
 
 							else:
 
@@ -1027,7 +1037,7 @@ class EVENT:
 
 									try: os.remove(f"{input_message.id}_RESPONDING_TECHS.py")
 									except Exception: pass
-				
+
 					await self.admin_modify()
 
 				elif option_selected == "confirm":
@@ -1074,7 +1084,7 @@ class EVENT:
 					button_view.add_item(cancel_button)
 
 					await self.param["ADMIN_CHANNEL"].send("✅ **Parameters confirmed!** Press the Start button to start the responding period. If you would like to cancel, press the Cancel button.", view = button_view)
-				
+
 			else:
 
 				# Defer interaction
@@ -1098,11 +1108,11 @@ class EVENT:
 				correct.append(parameter)
 			except KeyError:
 				incorrect.append(parameter)
-		
-		if len(correct) > 0:
+
+		if correct:
 			await message.channel.send(f"Successfully changed the parameters: {grammar_list(correct)}")
-		if len(incorrect) > 0:
+		if incorrect:
 			await message.channel.send(f"The following parameters are invalid: {grammar_list(incorrect)}")
-		
+
 		return
 

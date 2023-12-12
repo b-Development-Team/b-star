@@ -3,16 +3,8 @@
 def slice_func(array, index_start, index_end, index_step):
 
 
-    if index_step is None:
-        index_step = 1
-    else:
-        index_step = int(index_step)
-    
-    if index_end is None or index_end is "":
-        index_end = ""
-    else:
-        index_end = int(index_end)
-
+    index_step = 1 if index_step is None else int(index_step)
+    index_end = "" if index_end is None or index_end is "" else int(index_end)
     if index_start is None or index_start is "":
         index_start = ""
     else:
